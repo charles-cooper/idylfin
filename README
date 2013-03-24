@@ -4,11 +4,12 @@ idylfin
 Quantitative Finance Library for Java by Idylwood Technologies
 
 Features:
-Pure Java implementation
-High performing, accurate numerics library
+Pure 100% Java implementation
+Numerics library which is faster and more accurate than other Java numerical libraries
 Thread safe design
 Lightweight
 
+API to Yahoo Finance
 Sharpe Ratio and other financial statistics
 Split and dividend adjustment
 

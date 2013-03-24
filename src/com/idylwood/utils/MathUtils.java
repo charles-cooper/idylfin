@@ -315,8 +315,7 @@ public final class MathUtils {
 	}
 
 	// numerically precise implementation of sum
-	// Optimized version of http://stackoverflow.com/questions/394174/how-best-to-sum-up-lots-of-floating-point-numbers
-	// which is an implementation of Schewchuk's algorithm
+	// Optimized version of an implementation of Schewchuk's algorithm
 	// The implementation keeps full precision by keeping O(n) space
 	// for the error, unlike Kahan's algorithm which keeps O(1) space.
 	// The tradeoff is that this is theoretically more precise, but
@@ -403,12 +402,15 @@ public final class MathUtils {
 		return new org.apache.commons.math3.stat.descriptive.summary.Sum().evaluate(values);
 	}
 
-	// Implementation of sum which is both more numerically precise and faster
-	// than the naive implementation.
+	// Implementation of sum which is both more numerically
+	// precise _and faster_ than the naive implementation
+	// which is used in all standard numerical libraries I know of:
+	// Colt, OpenGamma, Apache Commons Math, EJML.
+	//
 	// Implementation uses variant of Kahan's algorithm keeping a running error
 	// along with the accumulator to try to cancel out the error at the end.
 	// This is much faster than Schewchuk's algorithm but not
-	// guaranteed to be precise to the same number of digits.
+	// guaranteed to be perfectly precise
 	// In most cases, however, it is just as precise.
 	public static final double sum(final double... values)
 	{
