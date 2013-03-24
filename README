@@ -16,3 +16,4 @@ Split and dividend adjustment
 Dependencies:
 IdylFin currently depends on Apache Commons Math, Jsoup and GRAL, forks of which are included in this source tree. In future versions I hope to get rid of the dependencies.
 
+
