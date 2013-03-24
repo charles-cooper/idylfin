@@ -23,21 +23,21 @@
  * Date: 2013
  * ====================================================
  */
-package com.idylytics.utils;
+package com.idylwood.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.idylytics.utils.MathUtils.LinearRegression;
-import com.idylytics.yahoo.Date;
-import com.idylytics.yahoo.HistRow;
-import com.idylytics.yahoo.HistTable;
-import com.idylytics.yahoo.YahooFinance;
-import com.idylytics.yahoo.YahooFinance.DivTable;
-import com.idylytics.yahoo.YahooFinance.Pair;
-import com.idylytics.yahoo.YahooFinance.SplitTable;
-import com.idylytics.yahoo.YahooFinance.Single;
+import com.idylwood.utils.MathUtils.LinearRegression;
+import com.idylwood.yahoo.Date;
+import com.idylwood.yahoo.HistRow;
+import com.idylwood.yahoo.HistTable;
+import com.idylwood.yahoo.YahooFinance;
+import com.idylwood.yahoo.YahooFinance.DivTable;
+import com.idylwood.yahoo.YahooFinance.Pair;
+import com.idylwood.yahoo.YahooFinance.SplitTable;
+import com.idylwood.yahoo.YahooFinance.Single;
 
 public class FinUtils {
 	

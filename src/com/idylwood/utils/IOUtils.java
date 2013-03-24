@@ -23,7 +23,7 @@
  * Date: 2013
  * ====================================================
  */
-package com.idylytics.utils;
+package com.idylwood.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -59,30 +59,5 @@ public class IOUtils {
 			os.write(ba,0,read);
 		}
 	}
-
-	/**
-	 * Copyright (C) 2010  Tobias Domhan
-	 * This method was taken from AndObjViewer
-	 */
-	public final static List<String> fastSplit(final String text, final char separator, int lenHint) {
-		final List<String> result = new ArrayList<String>(lenHint);
-	
-		if (text != null && text.length() > 0) {
-			int index1 = 0;
-			int index2 = text.indexOf(separator);
-			while (index2 >= 0) {
-				String token = text.substring(index1, index2);
-				result.add(token);
-				index1 = index2 + 1;
-				index2 = text.indexOf(separator, index1);
-			}
-	
-			if (index1 < text.length() - 1) {
-				result.add(text.substring(index1));
-			}
-		}//else: input unavailable
-	
-		return result;
-	}
-
 }
+

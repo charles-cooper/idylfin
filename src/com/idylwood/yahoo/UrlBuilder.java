@@ -24,7 +24,7 @@
  * ====================================================
  */
 
-package com.idylytics.yahoo;
+package com.idylwood.yahoo;
 
 import java.net.URL;
 import java.util.Map;

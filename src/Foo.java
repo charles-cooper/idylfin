@@ -1,5 +1,5 @@
 import org.apache.commons.math3.util.FastMath;
-import com.idylytics.utils.MathUtils;
+import com.idylwood.utils.MathUtils;
 public class Foo { 
 	private static final long HEX_40000000 = 0x40000000L; // 1073741824L
 	private static final double CBRTTWO[] = { 0.6299605249474366,
@@ -11,7 +11,7 @@ public class Foo {
 
 	static final void logTime(String msg)
 	{
-		com.idylytics.yahoo.YahooFinance.logTime(msg);
+		com.idylwood.yahoo.YahooFinance.logTime(msg);
 	}
 	static final void printHex(long l)
 	{

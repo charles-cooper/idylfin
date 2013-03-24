@@ -24,7 +24,7 @@
  * ====================================================
  */
 
-package com.idylytics.yahoo;
+package com.idylwood.yahoo;
 
 // TODO does this really need to implement Comparable<Date>?
 public class HistRow implements Comparable<Date>

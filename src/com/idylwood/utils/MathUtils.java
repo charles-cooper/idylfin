@@ -23,7 +23,7 @@
  * Date: 2013
  * ====================================================
  */
-package com.idylytics.utils;
+package com.idylwood.utils;
 
 import java.lang.Math;
 import java.math.BigDecimal;
@@ -316,11 +316,12 @@ public final class MathUtils {
 
 	// numerically precise implementation of sum
 	// Optimized version of an implementation of Schewchuk's algorithm
-	// The implementation keeps full precision by keeping O(n) space
+	// which keeps full precision by keeping O(n) space
 	// for the error, unlike Kahan's algorithm which keeps O(1) space.
-	// The tradeoff is that this is theoretically more precise, but
-	// Kahan's algorithm is almost always precise anyways. It is about
-	// 12 times slower than the naive implementation
+	// The tradeoff is that this is fully precise, but Kahan's algorithm
+	// is almost always precise anyways. It is about 12x slower
+	// than the naive implementation, but in turn about 10x faster than calculating
+	// the sum to full precision and then truncating.
 	public final static double sumSlow(double... values)
 	{
 		final double[] partials = new double[values.length];
@@ -334,7 +335,7 @@ public final class MathUtils {
 
 				if (Math.abs(x) < Math.abs(y))
 				{
-					double tmp = x;
+					final double tmp = x;
 					x = y;
 					y = tmp;
 				}
@@ -362,7 +363,7 @@ public final class MathUtils {
 	// debugger function, not really needed
 	static void logTime(String msg)
 	{
-		com.idylytics.yahoo.YahooFinance.logTime(msg);
+		com.idylwood.yahoo.YahooFinance.logTime(msg);
 	}
 
 	// returns newly allocated array of length len
@@ -424,8 +425,8 @@ public final class MathUtils {
 		for (int i = 0; i < len; i+=3)
 		{
 			final double val = values[i] + values[i+1] + values[i+2];
-			final double hi = sum + val;
-			err += hi - sum - val;
+			final double hi = sum + val; // CPU will round up
+			err += (hi - sum) - val; // CPU will round up again!
 			sum = hi;
 		}
 		if ( len != values.length)

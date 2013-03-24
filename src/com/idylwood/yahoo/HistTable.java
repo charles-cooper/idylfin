@@ -25,17 +25,17 @@
  */
 
 // TODO change package
-package com.idylytics.yahoo;
+package com.idylwood.yahoo;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.idylytics.utils.MathUtils;
-import com.idylytics.yahoo.YahooFinance.DivSplitTable;
-import com.idylytics.yahoo.YahooFinance.DivTable;
-import com.idylytics.yahoo.YahooFinance.Single;
-import com.idylytics.yahoo.YahooFinance.SplitTable;
+import com.idylwood.utils.MathUtils;
+import com.idylwood.yahoo.YahooFinance.DivSplitTable;
+import com.idylwood.yahoo.YahooFinance.DivTable;
+import com.idylwood.yahoo.YahooFinance.Single;
+import com.idylwood.yahoo.YahooFinance.SplitTable;
 
 
 public class HistTable

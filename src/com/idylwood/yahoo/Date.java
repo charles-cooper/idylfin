@@ -23,7 +23,7 @@
  * Date: 2013
  * ====================================================
  */
-package com.idylytics.yahoo;
+package com.idylwood.yahoo;
 
 public class Date implements Comparable<Date> {
 	final int year;

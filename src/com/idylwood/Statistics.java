@@ -23,12 +23,12 @@
  * Date: 2013
  * ====================================================
  */
-package com.idylytics;
+package com.idylwood;
 
 import org.apache.commons.math3.stat.regression.*;
 import org.apache.commons.math3.stat.correlation.*;
 
-import com.idylytics.yahoo.YahooFinance;
+import com.idylwood.yahoo.YahooFinance;
 
 import de.erichseifert.gral.data.Column;
 import de.erichseifert.gral.data.DataSource;

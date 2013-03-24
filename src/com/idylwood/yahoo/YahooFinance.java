@@ -24,9 +24,8 @@
  * ====================================================
  */
 
-package com.idylytics.yahoo;
+package com.idylwood.yahoo;
 
-import com.idylytics.*;
 
 import java.io.*;
 import java.net.URL;
@@ -38,8 +37,9 @@ import de.erichseifert.gral.data.*;
 import de.erichseifert.gral.data.filters.*;
 import de.erichseifert.gral.data.filters.Filter.Mode;
 
-import com.idylytics.utils.FinUtils;
-import com.idylytics.utils.IOUtils;
+import com.idylwood.*;
+import com.idylwood.utils.FinUtils;
+import com.idylwood.utils.IOUtils;
 
 public class YahooFinance
 {
