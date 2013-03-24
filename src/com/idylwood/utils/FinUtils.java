@@ -1,0 +1,222 @@
+package com.idylytics.utils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import com.idylytics.utils.MathUtils.LinearRegression;
+import com.idylytics.yahoo.Date;
+import com.idylytics.yahoo.HistRow;
+import com.idylytics.yahoo.HistTable;
+import com.idylytics.yahoo.YahooFinance;
+import com.idylytics.yahoo.YahooFinance.DivTable;
+import com.idylytics.yahoo.YahooFinance.Pair;
+import com.idylytics.yahoo.YahooFinance.SplitTable;
+import com.idylytics.yahoo.YahooFinance.Single;
+
+public class FinUtils {
+	
+	// Takes two HistTables, and extracts the adjusted close prices
+	// Removes rows where the days don't match
+	// Similar to quantmod merge.
+	// No side effects.
+	public static List<Pair> merge(HistTable table1, HistTable table2)
+	{
+		final int len = Math.min(table1.data.size(), table2.data.size());
+		List<Pair> ret = new ArrayList<Pair>(len);
+		int idx1 = 0;
+		int idx2 = 0;
+		while (true)
+		{
+			if (idx1==table1.data.size()) break;
+			if (idx2==table2.data.size()) break;
+			HistRow row1 = table1.data.get(idx1);
+			HistRow row2 = table2.data.get(idx2);
+			if (row1.date.toInt() > row2.date.toInt())
+			{
+				++idx2;
+				continue;
+			}
+			if (row1.date.toInt() < row2.date.toInt())
+			{
+				++idx1;
+				continue;
+			}
+			YahooFinance.Pair pair = new YahooFinance.Pair();
+			pair.date = new Date(row1.date.toInt());
+			pair.first = row1.adj_close;
+			pair.second = row2.adj_close;
+			ret.add(pair);
+	
+			++idx1;
+			++idx2;
+		}
+		return ret;
+	}
+
+	final public static double SharpeRatio(final double[] data, double[] benchmark)
+	{
+		final double[] logReturns = MathUtils.diff(MathUtils.log(data));
+		final double[] benchmarkReturns = MathUtils.diff(MathUtils.log(benchmark));
+		final double [] difference = MathUtils.subtract(logReturns,benchmarkReturns);
+		final double mean = MathUtils.mean(difference);
+		return mean / MathUtils.stdev(difference,mean);
+	}
+	
+	public static final double SharpeRatio(final HistTable data, final HistTable benchmark)
+	{
+		return SharpeRatio(data.CloseArray(), benchmark.CloseArray());
+	}
+
+	// assuming the riskFreeRate is constant and stuff
+	final public static double SharpeRatio(final double [] data, final double riskFreeRate)
+	{
+		// risk free rate is in percentage so make it log
+		final double logRiskFreeRate = Math.log(1+riskFreeRate);
+		final double [] logReturns = MathUtils.diff(MathUtils.log(data));
+		final double [] adjustedReturns = MathUtils.shift(logReturns,-logRiskFreeRate);
+		final double mean = MathUtils.mean(adjustedReturns);
+		return mean / MathUtils.stdev(adjustedReturns,mean);
+	}
+
+	public static final double SharpeRatio(final HistTable data, final double riskFreeRate)
+	{
+		return SharpeRatio(data.CloseArray(), riskFreeRate);
+	}
+
+	// the new sharpe ratio is literally identical to the information ratio
+	final public static double InformationRatio(final double[] data, double[] benchmark)
+	{
+		return SharpeRatio(data,benchmark);
+	}
+	
+	final public static double InformationRatio(final HistTable data, final HistTable benchmark)
+	{
+		return InformationRatio(data.CloseArray(),benchmark.CloseArray());
+	}
+
+	// TODO
+	/*
+	final public static double SortinoRatio()
+	   {
+		   return 0;
+	   }
+	   */
+
+	final public static double JensensAlpha(final double data[], final double[] benchmark, final double riskFreeRate)
+	{
+		// TODO double check this math from Wikipedia(!)
+		// alpha_J = R_i - [R_f + beta_iM * (R_M - R_f)]
+		// alpha_J Jensen's alpha
+		// R_i risk free rate
+		// R_f portfolio return
+		// R_M market return
+		// beta_iM beta of portfolio wrt market
+		LinearRegression regress = MathUtils.regress(data,benchmark);
+		return MathUtils.sum(FinUtils.totalLogReturn(data),-riskFreeRate,-regress.slope * FinUtils.totalLogReturn(benchmark), regress.slope*riskFreeRate);
+	}
+	final public static double JensensAlpha(final HistTable data,
+			final HistTable benchmark, final double riskFreeRate)
+	{
+		return JensensAlpha(data.CloseArray(), benchmark.CloseArray(), riskFreeRate);
+	}
+
+	// numerical precision not guaranteed
+	final public static double totalLogReturn(final double data[])
+	{
+		return Math.log(FinUtils.totalReturn(data));
+	}
+	final public static double totalLogReturn(final HistTable data)
+	{
+		return totalLogReturn(data.CloseArray());
+	}
+
+	final public static double totalReturn(final double data[])
+	{
+		return data[data.length-1] / data[0];
+	}
+	public static final double totalReturn(final HistTable data)
+	{
+		return totalReturn(data.CloseArray());
+	}
+
+	final public static double TreynorRatio(final double[] data, double [] benchmark)
+	{
+		final double[] logReturns = MathUtils.diff(MathUtils.log(data));
+		final double [] benchmarkReturns = MathUtils.diff(MathUtils.log(data));
+		final LinearRegression regress = MathUtils.regress(logReturns, benchmarkReturns);
+		return MathUtils.mean(MathUtils.subtract(logReturns,benchmarkReturns)) / regress.slope;
+	}
+	public static final double TreynorRatio(final HistTable data, final HistTable benchmark)
+	{
+		return TreynorRatio(data.CloseArray(), benchmark.CloseArray());
+	}
+
+	final public static double CalmarRatio(final double[] data)
+	{
+		final double averageDailyReturn = MathUtils.mean(MathUtils.diff(MathUtils.log(data)));
+		return (averageDailyReturn * 250) / FinUtils.MaximumDrawdown(data);
+	}
+	public static final double CalmarRatio(final HistTable data)
+	{
+		return CalmarRatio(data.CloseArray());
+	}
+
+	// returns max drawdown in log percent
+	final public static double MaximumDrawdown(final double[] data)
+	{
+		double maxDrawdown = 0;
+		double peak = 0;
+		for (double x : data)
+		{
+			if (peak < x)
+			{
+				peak = x;
+				continue;
+			}
+			double drawdown = -Math.log(x / peak);
+			if (drawdown < 0) throw new RuntimeException("You have bug!");
+			if (drawdown > maxDrawdown) maxDrawdown = drawdown;
+		}
+		return maxDrawdown;
+	}
+	
+	public final static double MaximumDrawdown(final HistTable data)
+	{
+		return MaximumDrawdown(data.CloseArray());
+	}
+
+	// returns empirical VAR as log percentage
+	final public static double VAR(final double [] data, final double threshold)
+	{
+		if (0.0 > threshold || 1.0 < threshold)
+			throw new ArithmeticException("Bad threshold parameter: "+threshold);
+		final double [] logReturns = MathUtils.diff(MathUtils.log(data));
+		Arrays.sort(logReturns);
+		int idx = (int)(threshold * data.length);
+		return data[idx];
+	}
+	
+	final public static double VAR(final HistTable data, final double threshold)
+	{
+		return VAR(data.CloseArray(), threshold);
+	}
+
+	// returns empirical CVAR as log percentage
+	// Threshold must be between 0 and 1.
+	final public static double CVAR(double [] data, double threshold)
+	{
+		if (0.0 > threshold || 1.0 < threshold)
+			throw new ArithmeticException("Bad threshold parameter: "+threshold);
+		final double [] logReturns = MathUtils.diff(MathUtils.log(data));
+		Arrays.sort(logReturns);
+		int idx = (int)(threshold * data.length);
+		double [] underThreshold = Arrays.copyOfRange(logReturns,0,idx+1);
+		return MathUtils.sum(underThreshold);
+	}
+	final public static double CVAR(final HistTable data, double threshold)
+	{
+		return CVAR(data.CloseArray(),threshold);
+	}
+
+}

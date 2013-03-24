@@ -1,0 +1,18 @@
+idylfin
+=======
+
+Quantitative Finance Library for Java by Idylwood Technologies
+
+Features:
+Pure Java implementation
+High performant, accurate numerics library
+Thread safe design
+Clean API
+Lightweight
+
+Sharpe Ratio and other financial statistics
+Split and dividend adjustment
+
+Dependencies:
+IdylFin currently depends on Apache Commons Math, Jsoup and GRAL, forks of which are included in this source tree. In future versions I hope to get rid of the dependencies.
+

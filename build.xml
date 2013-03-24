@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="idylfin" default="build" basedir=".">
+	<path id="project.class.path"/> <!-- do we need this?-->
+
+	<target name="libs" description="Copy libs to bin/lib">
+		<mkdir dir="bin/lib" />
+	</target>
+
+	<target name="javac" depends="libs" description="Compile java source to bytecode">
+		<mkdir dir="bin"/>
+		<javac srcdir="src" includes="**" encoding="utf-8"
+			destdir="bin/"
+			source="1.6" target="1.6" nowarn="false"
+			debug="true" debuglevel="lines,vars,source">
+			<classpath refid="project.class.path"/>
+		</javac>
+		<copy todir="bin/"> <!-- not really needed anymore -->
+			<fileset dir=".">
+				<include name="*.properties"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="build" depends="javac" description="Build this project" />
+
+	<target name="clean" description="Cleans this project">
+		<delete dir="bin"/>
+		<delete dir="." includes="**/*.class"/>
+	</target>
+</project>
+
