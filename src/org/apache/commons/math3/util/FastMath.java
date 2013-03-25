@@ -2987,7 +2987,8 @@ public class FastMath {
      * @return abs(x)
      */
     public static int abs(final int x) {
-        return (x < 0) ? -x : x;
+	    final int i = (x>>>31)&1;
+	    return (x^(~i+1))+ i;
     }
 
     /**
@@ -2996,7 +2997,12 @@ public class FastMath {
      * @return abs(x)
      */
     public static long abs(final long x) {
-        return (x < 0l) ? -x : x;
+	    final long l = (x>>>63);
+	    // l is one if x negative zero else
+	    // ~l+1 is zero if x is positive, -1 if x is negative
+	    // x^(~l+1) is x is x is positive, ~x if x is negative
+	    // add around
+	    return (x^(~l+1)) + l;
     }
 
     /**
@@ -3005,7 +3011,8 @@ public class FastMath {
      * @return abs(x)
      */
     public static float abs(final float x) {
-        return (x < 0.0f) ? -x : (x == 0.0f) ? 0.0f : x; // -0.0 => +0.0
+        //return (x < 0.0f) ? -x : (x == 0.0f) ? 0.0f : x; // -0.0 => +0.0
+	    return Float.intBitsToFloat(Integer.MAX_VALUE & Float.floatToRawIntBits(x));
     }
 
     /**
@@ -3014,7 +3021,11 @@ public class FastMath {
      * @return abs(x)
      */
     public static double abs(double x) {
-        return (x < 0.0) ? -x : (x == 0.0) ? 0.0 : x; // -0.0 => +0.0
+        //return (x < 0.0) ? -x : (x == 0.0) ? 0.0 : x; // -0.0 => +0.0
+        //if ((Double.doubleToRawLongBits(x) & Long.MIN_VALUE)==0)
+	//	return x;
+	//return -x;
+	return Double.longBitsToDouble(Long.MAX_VALUE & Double.doubleToRawLongBits(x));
     }
 
     /**

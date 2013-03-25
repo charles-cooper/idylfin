@@ -5,7 +5,8 @@ Quantitative Finance Library for Java by Idylwood Technologies
 
 Features:
 Pure 100% Java implementation
-Numerics library which is faster and more accurate than other Java numerical libraries
+Numerics library which is fast _and_ numerically precise. Some methods are more than 7 TIMES faster than their jBLAS (which is a wrapper to native code) counterparts. Granted, some methods are 7 times slower, but we're working on that ;).
+Implementation doesn't sacrifice speed for accuracy.
 Thread safe design
 Lightweight
 
@@ -19,4 +20,10 @@ IdylFin currently depends on Apache Commons Math, Jsoup and GRAL, forks of which
 License:
 Apache 2.0. You can view the terms of the license at http://www.apache.org/licenses/LICENSE-2.0.html. Idylwood Technologies is not responsible for any damages resulting from the use or misuse of this code.
 
+Lead Commit:
+Charles Cooper
+
+Contributors:
+Chantal Murthy
+Feynman Liang
 

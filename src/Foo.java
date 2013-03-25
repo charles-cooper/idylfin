@@ -1,5 +1,6 @@
 import org.apache.commons.math3.util.FastMath;
 import com.idylwood.utils.MathUtils;
+import java.util.Random;
 public class Foo { 
 	private static final long HEX_40000000 = 0x40000000L; // 1073741824L
 	private static final double CBRTTWO[] = { 0.6299605249474366,
@@ -27,80 +28,82 @@ public class Foo {
 		final long m = Double.doubleToLongBits(magnitude);
 		final long s = Double.doubleToLongBits(sign);
 		if (0<=(m^s)) 
-		//if ( (m>=0 ^ s>=0))
-		//if ((m>=0)&&(s>=0) || (m<0)&&(s<0))
+			//if ( (m>=0 ^ s>=0))
+			//if ((m>=0)&&(s>=0) || (m<0)&&(s<0))
 			return -magnitude;
 		return magnitude; // flip sign
+	}
+
+	static final long ULP_MASK = (~0L << 52) | 1;
+	public static final double ulp(final double d)
+	{
+		final long l = Double.doubleToRawLongBits(d);
+		return Double.longBitsToDouble(l & ULP_MASK);
+	}
+
+	public static final long abs(final long l)
+	{
+		//return l & ~Long.MIN_VALUE;
+		return FastMath.abs(l);
+	}
+	public static final double abs(final double d)
+	{
+		//return FastMath.getExponent(d);
+		//return getExponent(d);
+		return FastMath.abs(d);
 	}
 
 	public static int getExponent(final double d)
 	{
 		return (int) ((Double.doubleToRawLongBits(d) >>> 52) & 0x7ff) - 1023;
 	}
-
-	public static double nextAfter(double d, double direction) {
-		// handling of some important special cases
-		if (Double.isNaN(d) || Double.isNaN(direction)) {
-			return Double.NaN;
-		} else if (d == direction) {
-			return direction;
-		} else if (Double.isInfinite(d)) {
-			return copySign(Double.MAX_VALUE,direction);
-		} else if (d == 0) {
-			return copySign(Double.MIN_VALUE,direction);
-		}
-		// special cases MAX_VALUE to infinity and  MIN_VALUE to 0
-		// are handled just as normal numbers
-
-		final long bits = Double.doubleToRawLongBits(d);
-		final long sign = bits & 0x8000000000000000L;
-		if ((direction < d) ^ (sign == 0L))
-			return Double.longBitsToDouble(sign | ((bits & 0x7fffffffffffffffL) + 1));
-		else
-			return Double.longBitsToDouble(sign | ((bits & 0x7fffffffffffffffL) - 1));
-	}
-
 	public static void main(String [] args)
 	{
-		double d = -Math.nextUp(-Double.MIN_NORMAL);
-		d = Double.POSITIVE_INFINITY;
-		if (getExponent(d)==Math.getExponent(d))
-		{
-			System.out.println("passed");
-		}
-		logTime("Start");
-		double mag = Math.random() - 0.5;
+		System.out.println(Long.toHexString(Long.MAX_VALUE));
+		final Random r = new Random();
 		final int len = 1000*1000*100;
-		final double [] random = MathUtils.shift(MathUtils.random(len),-.5);
-		double x = 0;
-		int k = 0;
-		for (int i = len-1; i--!=0;)
+		System.out.println(FastMath.abs(-100.0f));
+		System.out.println(FastMath.abs(100.0f));
+		for (int i = 0; i < len; i++)
 		{
-			mag = copySign(mag,random[i]);
-			//mag = FastMath.copySign(mag,random[i]);
-			//x = nextAfter(random[i],random[i+1]);
-			//if (x != FastMath.nextAfter(random[i],random[i+1]))
-			//	throw new RuntimeException("Uh oh");
-			//k = getExponent(random[i]);
-			//if (k != FastMath.getExponent(random[i]))
-				//throw new RuntimeException("Uh oh");
+			long l = r.nextLong();
+			if (Math.abs(l)!=FastMath.abs(l))
+				throw new RuntimeException("long! "+Long.toHexString(Math.abs(l))+" "+Long.toHexString(FastMath.abs(l)));
 		}
-		logTime("warmed up");
-		for (int i = len-1; i--!=0;)
+
+		//final long[]data = new long[len];
+		//for (int i = len; i--!=0;)
+		//	data[i] = r.nextLong();
+		final double[] data = new double[len];
+		for (int i = 0; i < len; ++i) data[i] = Math.random() - .5;
+
+		//long x,y;
+		double x,y;
+		x=y=0;
+		logTime("Loaded");
+		for (int i = 0; i < len-1; i++)
 		{
-			mag = copySign(mag,random[i]);
-			//x = nextAfter(random[i],random[i+1]);
-			//k = getExponent(random[i]);
+			x += abs(data[i]);
+			y += data[i+1];
+			//if (Math.abs(data[i])!=abs(data[i]))
+			//	throw new RuntimeException("Uh oh");
+		}
+		logTime("warmed up: "+x+y);
+		//for (int i = 0; i < len - len%3; i+=3)
+		for (int i = 0; i < len-1; i++)
+		{
+			y += abs(data[i]); // cheap operation to make sure the JIT doesn't optimize it out
+			x += abs(data[i+1]);
 		}
 		logTime("mine");
-		for (int i = len-1; i--!=0;)
+		for (int i = 0; i < len-1; i++)
 		{
-			//mag = FastMath.copySign(mag,random[i]);
-			//x = FastMath.nextAfter(random[i],random[i+1]);
-			//k = FastMath.getExponent(random[i]);
+			y += data[i];
+			x += data[i+1];
 		}
-		logTime("apache");
-		System.out.println(k+x+mag);
+		logTime("normal");
+		System.out.println(x+" "+y);
 	}
 }
+
 

@@ -38,7 +38,6 @@ import java.util.List;
 // TODO get rid of this class
 public class Statistics
 {
-
 	private static double[][] data(List<YahooFinance.Pair> pairs)
 	{
 		double[][] data = new double[pairs.size()-1][2];

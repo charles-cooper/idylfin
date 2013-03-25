@@ -318,6 +318,7 @@ public class HistTable
 	}
 
 	// Adjust OHLC for dividends and splits
+	// Returns newly allocated table with no side effects.
 	public HistTable AdjustOHLC()
 		throws IOException
 	{

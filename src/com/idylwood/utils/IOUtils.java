@@ -39,7 +39,7 @@ public class IOUtils {
 		throws IOException
 	{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(len);
-		IOUtils.Transfer(is,baos);
+		Transfer(is,baos);
 		return baos.toString();
 	}
 

@@ -25,7 +25,6 @@
  */
 package com.idylwood.utils;
 
-import java.lang.Math;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Arrays;
@@ -226,10 +225,12 @@ public final class MathUtils {
 		return ret;
 	}
 
-	// Returns newly allocated array of length min(first.length, second.length)
+	// Returns newly allocated array.
 	final public static double [] multiply(final double [] first, final double[] second)
 	{
-		final int len = Math.min(first.length,second.length);
+		final int len = first.length;
+		if (len!=second.length)
+			throw new ArrayIndexOutOfBoundsException("Tried to multiply two vectors of unequal length!");
 		final double ret[] = new double[len];
 		for (int i = len; i--!=0;)
 			ret[i] = first[i]*second[i];
@@ -417,24 +418,27 @@ public final class MathUtils {
 	{
 		double sum = 0;
 		double err = 0;
-		final int len = values.length - values.length%3;
+		final int unroll = 6; // empirically it doesn't get much better than this
+		final int len = values.length - values.length%unroll;
 
 		// unroll the loop. due to IEEE 754 restrictions
 		// the JIT shouldn't be allowed to unroll it dynamically, so it's
 		// up to us to do it by hand ;)
-		for (int i = 0; i < len; i+=3)
+		int i = 0;
+		for (; i < len; i+=unroll)
 		{
-			final double val = values[i] + values[i+1] + values[i+2];
+			final double val = values[i] + values[i+1]
+				+ values[i+2] + values[i+3]
+				+ values[i+4] + values[i+5];
 			final double hi = sum + val; // CPU will round up
 			err += (hi - sum) - val; // CPU will round up again!
 			sum = hi;
 		}
-		if ( len != values.length)
+		for (; i < values.length; i++)
 		{
-			final double val = (1==values.length%3) ? values[values.length - 1]
-				: values[values.length-2] + values[values.length-1];
+			final double val = values[i];
 			final double hi = sum + val;
-			err += hi - sum - val;
+			err += (hi - sum) - val;
 			sum = hi;
 		}
 		return sum - err;
@@ -449,12 +453,13 @@ public final class MathUtils {
 	{
 		double ret = 0;
 		// unroll the loop since the JIT shouldn't
-		final int len = values.length&~1; // also known as values.length - values.length%2 ;)
-		for (int i = 0; i < len; i+=2)
-			ret += values[i] + values[i+1];
-
-		// add on the rest.
-		if (len!=values.length) ret += values[values.length-1];
+		final int unroll = 4; // empirically unrolling more than 2 doesn't help much
+		final int len = values.length - values.length%unroll;
+		int i = 0;
+		for (; i < len; i+=unroll)
+			ret += values[i] + values[i+1] + values[i+2] + values[i+3];
+		for (; i < values.length; i++)
+			ret += values[i];
 		return ret;
 	}
 
@@ -477,7 +482,7 @@ public final class MathUtils {
 		return sum(values)==sumSlow(values);
 	}
 
-	final static void printArray(double[] d)
+	public final static void printArray(double[] d)
 	{
 		System.out.print("[");
 		for (int i = 0; i < d.length; ++i)
@@ -522,15 +527,30 @@ public final class MathUtils {
 	}
 
 	// Numerically precise dot product. Keeps a running error along with the
-	// accumulator.
+	// accumulator. Equivalent to MathUtils.sum(MathUtils.multiply(x,y))
+	// but much faster and with O(1) memory overhead.
 	// O(n) with O(1) space.
-	// TODO think about unrolling the loop.
-	static final double linearCombination(final double[]x,final double[]y)
+	// Even faster than the naive implementation ;).
+	public static final double linearCombination(final double[]x, final double[]y)
 	{
-		final int len = Math.min(x.length,y.length);
+		//if (true) return MathUtils.sum(MathUtils.multiply(x,y));
+		if (x.length!=y.length)
+			throw new ArrayIndexOutOfBoundsException("Tried to take a dot product of"
+					+" two unequal length vectors!");
+		final int unroll = 3; // don't blindly change this without changing the loop!
+		final int len = x.length - x.length%unroll;
 		double sum = 0;
 		double err = 0;
-		for (int i = len; i--!=0;)
+		int i = 0;
+		for (; i < len; i+= unroll)
+		{
+			// this line depends on unroll variable.
+			final double prod = x[i]*y[i] + x[i+1]*y[i+1] + x[i+2]*y[i+2];
+			final double hi = sum + prod;
+			err += hi - sum - prod;
+			sum = hi;
+		}
+		for (; i < x.length; i++)
 		{
 			final double prod = x[i]*y[i];
 			final double hi = sum + prod;
@@ -538,6 +558,89 @@ public final class MathUtils {
 			sum = hi;
 		}
 		return sum - err;
+	}
+
+	public static final double normSquared(final double[]x)
+	{
+		return linearCombination(x,x);
+	}
+
+	public static final double norm(final double[] x)
+	{
+		return Math.sqrt(normSquared(x));
+	}
+
+	public static final double[] extractColumn(final double[][] matrix, final int idx)
+	{
+		final double[] ret = new double[matrix[0].length];
+		for (int i = 0; i < matrix.length; i++)
+			ret[i] = matrix[i][idx];
+		return ret;
+	}
+
+	// TODO think about parallelizing this
+	public static final double[][] matrixMultiply(final double[][] first, final double[][] second)
+	{
+		// i,j,k
+		final int firstRows = first.length;
+		final int firstCols = first[0].length;
+		final int secondRows = second.length;
+		final int secondCols = second[0].length;
+		if (firstCols!=secondRows)
+			throw new ArrayIndexOutOfBoundsException("Trying to multiply matrices of different dimensions?!");
+		final double ret[][] = new double[firstRows][secondCols];
+		for (int i = 0; i < secondCols; i++)
+		// iterate over columns so we can maintain cache locality!
+		{
+			final double[] vector = extractColumn(second,i);
+			for (int k = 0; k < firstRows; k++)
+			{
+				ret[k][i] = linearCombination(first[k],vector);
+			}
+		}
+		return ret;
+	}
+
+	public static final double[][] matrixMultiplyFast(final double[][] first, final double[][] second)
+	{
+		final int firstRows = first.length;
+		final int firstCols = first[0].length;
+		final int secondRows = second.length;
+		final int secondCols = second[0].length;
+		if (firstCols!=secondRows)
+			throw new ArrayIndexOutOfBoundsException("Trying to multiply matrices of different dimensions?!");
+		final double ret[][] = new double[firstRows][secondCols];
+		for (int i = 0; i < secondCols; i++)
+		// iterate over columns so we can maintain cache locality!
+		{
+			final double[] vector = extractColumn(second,i);
+			for (int k = 0; k < firstRows; k++)
+			{
+				ret[k][i] = linearCombinationFast(first[k],vector);
+			}
+		}
+		return ret;
+	}
+
+	// Pre: matrix has m rows and n columns, and vector has n elements.
+	// Note: no checking on the sizes of the inputs!
+	// May throw ArrayIndexOutOfBoundsExceptions or other such
+	// nasty things if you don't sanitize input!
+	public static final double[] matrixMultiply(final double[][] matrix, final double[] vector)
+	{
+		// recall matrix is double[rows][cols], and matrix.length==rows
+		final double ret[] = new double[matrix.length];
+		for (int i = 0; i < matrix.length; i++)
+			ret[i] = linearCombination(matrix[i],vector);
+		return ret;
+	}
+
+	public static final double[] matrixMultiplyFast(final double[][] matrix, final double[] vector)
+	{
+		final double []ret = new double[matrix.length];
+		for (int i = 0; i < matrix.length; ++i)
+			ret[i] = linearCombinationFast(matrix[i],vector);
+		return ret;
 	}
 
 	// Numerically precise dot product. Returns MathUtils.sumSlow(MathUtils.multiply(x,y));
@@ -552,11 +655,24 @@ public final class MathUtils {
 	// Naive implementation.
 	static final double linearCombinationFast(final double []x, final double[]y)
 	{
-		final int len = Math.min(x.length,y.length);
+		if (x.length!=y.length)
+			throw new ArrayIndexOutOfBoundsException("Dot product of vectors with different lengths!");
 		double ret = 0;
-		for (int i = len; 0!=i--;)
-			ret+= x[i]*y[i];
+		final int unroll = 1;
+		final int len = x.length - x.length%unroll;
+		int i = 0;
+		for (; i < len; i+=unroll)
+			ret+= x[i]*y[i];// + x[i+1]*y[i+1] + x[i+2]*y[i+2];
+		// get the terms at the end
+		for (; i < x.length; i++)
+			ret += x[i]*y[i];
 		return ret;
+	}
+
+	static final double distance(final double[]p, final double[]q)
+	{
+		// TODO make this faster if needed, as it is it is going to loop like three times ;)
+		return Math.sqrt(sum(pow(subtract(p,q),2)));
 	}
 
 	// Returns a double with the exponent and sign set to zero.
@@ -624,10 +740,30 @@ public final class MathUtils {
 		return true;
 	}
 
+	public static final double[][] covariance(final double[][] data)
+	{
+		final int len = data.length;
+		final double []means = new double[len]; // precalculate the means
+		final double[][] ret = new double[len][len];
+		for (int i = 0; i < len; i++)
+		{
+			means[i] = mean(data[i]);
+			for (int j = 0; j <= i; j++)
+			{
+				final double d = sum(multiply(shift(data[i],-means[i]),shift(data[j],-means[j]))) / (len);
+				ret[i][j] = d;
+				ret[j][i] = d;
+			}
+		}
+		return ret;
+	}
+
 	public static void main(String[] args)
 	{
-		logTime("Start");
-		//int len = 1<<24;
+		final double [][]cov = covariance(new double[][]{{1,2,3},{0,1,1.5}});
+		System.out.println(cov[1][1] - 0.5833333333333333703408);
+		if (true) return;
+
 		final int len = 1000*1000*100;
 		final double[] data = random(len);
 		final double fast,medium,slow;
@@ -639,26 +775,11 @@ public final class MathUtils {
 		compare("MS",medium,slow);
 		compare("FM",fast,medium);
 
-
-		final int sz = 1000;
 		sumSlow(data);
-		/*
-		for (int i = sz; i--!=0;)
-			Arrays.copyOf(data,data.length);
-			//data.clone();
-		for (int i = sz; i--!=0;)
-			copyOf(data);
-			*/
 		logTime("slow");
 		sumFast(data);
-		//for (int i = sz; i--!=0;)
-		//	copyOf(data);
 		logTime("fast");
-		//for (int i = sz; i--!=0;)
-			//data.clone();
-		//	Arrays.copyOf(data,data.length);
 		sum(data);
-		//reverse(data);
 		logTime("mine");
 	}
 }

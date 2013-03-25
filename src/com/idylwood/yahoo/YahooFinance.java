@@ -39,6 +39,7 @@ import de.erichseifert.gral.data.filters.Filter.Mode;
 
 import com.idylwood.*;
 import com.idylwood.utils.FinUtils;
+import com.idylwood.utils.MathUtils;
 import com.idylwood.utils.IOUtils;
 
 public class YahooFinance
@@ -321,6 +322,7 @@ public class YahooFinance
 		return sYahooFinance;
 	}
 
+	/*
 	// Assumes the second column is double.
 	static public DataTable normalize(DataTable data)
 	{
@@ -344,6 +346,7 @@ public class YahooFinance
 
 		return ret;
 	}
+	*/
 
 	static long time = 0;
 	// helper function
@@ -408,25 +411,12 @@ public class YahooFinance
 		Date today = new Date(new java.util.Date());
 		Date start = new Date(20000101);
 		//yf.Alphabet("SPY","AAPL",100,.5);
-		String symbol = "BAC";
-		HistTable ht = yf.HistoricalPrices(symbol,start,today);
-		ht = yf.HistoricalPrices(symbol,start,today);
-		DivSplitTable dst = yf.HistoricalDivSplits(symbol,start,today);
-		for (Single s : dst.DivTable().data)
-		{
-			System.out.println(((Date)s).toString()+" "+s.data);
-		}
-		HistTable adj = ht.AdjustOHLC();
-		HistTable adj2 = ht.AdjustOHLCWithReinvestment();
-		List<Pair> merged = FinUtils.merge(adj,adj2);
-
-		for (int i = 0; i < adj.data.size(); ++i)
-		{
-			HistRow row = adj.data.get(i);
-			System.out.println(row.date+","+adj.data.get(i).close
-					+","+adj2.data.get(i).close
-					+","+ht.data.get(i).close);
-		}
+		String []symbols = new String[]{"BAC","JPM"};
+		List<HistTable> tables = new ArrayList<HistTable>();
+		for (String symbol : symbols)
+			tables.add(yf.HistoricalPrices(symbol,start,today).AdjustOHLC());
+		double[] weights = FinUtils.MarkowitzPortfolio(tables);
+		MathUtils.printArray(weights);
 	}
 }
 

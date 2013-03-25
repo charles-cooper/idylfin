@@ -87,6 +87,11 @@ public class FinUtils {
 		final double mean = MathUtils.mean(difference);
 		return mean / MathUtils.stdev(difference,mean);
 	}
+
+	public final static double[] logReturns(final double[] data)
+	{
+		return MathUtils.diff(MathUtils.log(data));
+	}
 	
 	public static final double SharpeRatio(final HistTable data, final HistTable benchmark)
 	{
@@ -244,4 +249,21 @@ public class FinUtils {
 		return CVAR(data.CloseArray(),threshold);
 	}
 
+	// Pre: all the tables have the same start and end date and have the same
+	// number of rows.
+	// TODO make this public
+	final static double[] MarkowitzPortfolio(final java.util.List<HistTable> tables)
+	{
+		final double[][] data = new double[tables.size()][];
+		int i = 0;
+		for (HistTable ht : tables)
+			data[i++] = MathUtils.diff(MathUtils.log(ht.CloseArray())); // yay hammering malloc
+
+		final double[][] covariance = MathUtils.covariance(data);
+		final double[] returns = new double[data.length];
+		for (i = 0; i < returns.length; ++i)
+			returns[i] = totalLogReturn(data[i]);
+		final double riskTolerance = 0.15;
+		return OptimizationUtils.cvxSolve(covariance,returns,riskTolerance);
+	}
 }
