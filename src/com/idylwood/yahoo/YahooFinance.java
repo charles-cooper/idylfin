@@ -415,8 +415,10 @@ public class YahooFinance
 		List<HistTable> tables = new ArrayList<HistTable>();
 		for (String symbol : symbols)
 			tables.add(yf.HistoricalPrices(symbol,start,today).AdjustOHLC());
+		/*
 		double[] weights = FinUtils.MarkowitzPortfolio(tables);
 		MathUtils.printArray(weights);
+		*/
 	}
 }
 
