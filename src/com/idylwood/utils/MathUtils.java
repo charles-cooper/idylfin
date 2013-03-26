@@ -334,7 +334,7 @@ public final class MathUtils {
 			{
 				double y = partials[j];
 
-				if (Math.abs(x) < Math.abs(y))
+				if (abs(x) < abs(y))
 				{
 					final double tmp = x;
 					x = y;
@@ -404,6 +404,11 @@ public final class MathUtils {
 		return new org.apache.commons.math3.stat.descriptive.summary.Sum().evaluate(values);
 	}
 
+	public static final double abs(final double d)
+	{
+		return Double.longBitsToDouble(Long.MAX_VALUE & Double.doubleToRawLongBits(d));
+	}
+
 	// Implementation of sum which is both more numerically
 	// precise _and faster_ than the naive implementation
 	// which is used in all standard numerical libraries I know of:
@@ -430,8 +435,8 @@ public final class MathUtils {
 			final double val = values[i] + values[i+1]
 				+ values[i+2] + values[i+3]
 				+ values[i+4] + values[i+5];
-			final double hi = sum + val; // CPU will round up
-			err += (hi - sum) - val; // CPU will round up again!
+			final double hi = sum + val;
+			err += (hi - sum) - val;
 			sum = hi;
 		}
 		for (; i < values.length; i++)
@@ -680,7 +685,7 @@ public final class MathUtils {
 	// which is the IEEE 754 exponent bias).
 	static final double mantissa(final double d)
 	{
-		return Math.abs(Math.scalb(d,-Math.getExponent(d)));
+		return abs(Math.scalb(d,-Math.getExponent(d)));
 	}
 
 	// Allocates new array which is reverse of the argument.

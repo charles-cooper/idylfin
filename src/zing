@@ -1,4 +1,0 @@
-#!/bin/sh
-
-ZING=/opt/zing/zingLX-jdk1.6.0_33-5.5.3.0-5/bin
-$ZING/java
