@@ -3411,8 +3411,13 @@ public class FastMath {
      * @param x number from which closest long is requested
      * @return closest long to x
      */
+    static final long ONE_HALF = Double.doubleToRawLongBits(0.5d);
     public static long round(double x) {
-        return (long) floor(x + 0.5);
+        //return (long) floor(x + 0.5);
+	//return (long) (x + copySign(0.5,x));
+        final long l = Double.doubleToRawLongBits(x) & Long.MIN_VALUE; // sign
+        final long foo = ONE_HALF | l;
+	return (long)(x + Double.longBitsToDouble(foo));
     }
 
     /** Get the closest int to x.

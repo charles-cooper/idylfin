@@ -5,8 +5,8 @@ Quantitative Finance Library for Java by Idylwood Technologies
 
 Features:
 Pure 100% Java implementation
-Fast -- some numerical methods are more than 7 TIMES faster than their JBLAS (which is a wrapper to native BLAS code) counterparts.
-Numerically accurate. Only existing Java implementation of a numerically stable sum!
+Fast -- some numerical methods are more than 7 TIMES faster than their JBLAS (which is a wrapper to native BLAS code) counterparts
+Numerically stable
 Thread safe design
 Lightweight
 

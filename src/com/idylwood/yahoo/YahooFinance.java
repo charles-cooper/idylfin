@@ -42,13 +42,14 @@ import com.idylwood.utils.FinUtils;
 import com.idylwood.utils.MathUtils;
 import com.idylwood.utils.IOUtils;
 
+// Class intended to provide wrapper to Yahoo Finance API
 public class YahooFinance
 {
 	final static public Date DEFAULT_START_DATE = new Date(20070101);
-	Map<String,HistTable> mTables = new HashMap<String,HistTable>();
-	Map<String,DivTable> mDividends = new HashMap<String,DivTable>();
-	Map<String,SplitTable> mSplits = new HashMap<String,SplitTable>();
-	Map<String,DivSplitTable> mDivSplits = new HashMap<String,DivSplitTable>();
+	final Map<String,HistTable> mTables = new HashMap<String,HistTable>();
+	final Map<String,DivTable> mDividends = new HashMap<String,DivTable>();
+	final Map<String,SplitTable> mSplits = new HashMap<String,SplitTable>();
+	final Map<String,DivSplitTable> mDivSplits = new HashMap<String,DivSplitTable>();
 
 	// Surprisingly useful class which contains two doubles and a date.
 	// TODO refactor to extend Date
@@ -132,7 +133,7 @@ public class YahooFinance
 		int status;
 
 		// TODO refactor so this is a method in an abstract Table class
-		public DivSplitTable SubTable(Date startDate, Date endDate)
+		public DivSplitTable SubTable(final Date startDate, final Date endDate)
 		{
 			DivSplitTable ret = new DivSplitTable(this.size());
 			for (Pair row : this)
@@ -150,7 +151,7 @@ public class YahooFinance
 		public DivTable DivTable()
 		{
 			final List<Single> data = new ArrayList<Single>();
-			for (Pair p : this)
+			for (final Pair p : this)
 				if (0!=p.first)
 					data.add(new Single(p.date,p.first));
 			DivTable ret = new DivTable(this.symbol,
@@ -167,7 +168,7 @@ public class YahooFinance
 			ret.symbol = this.symbol;
 			ret.dateAccessed = this.dateAccessed;
 			ret.data = new ArrayList<Single>();
-			for (Pair p : this)
+			for (final Pair p : this)
 				if (0!=p.second)
 					ret.data.add(new Single(p.date,p.second));
 			return ret;
@@ -177,14 +178,14 @@ public class YahooFinance
 	public DivTable HistoricalDividends(String symbol, Date startDate, Date endDate)
 		throws IOException
 	{
-		DivSplitTable dst = this.HistoricalDivSplits(symbol,startDate,endDate);
+		final DivSplitTable dst = this.HistoricalDivSplits(symbol,startDate,endDate);
 		return dst.DivTable();
 	}
 
 	public SplitTable HistoricalSplits(String symbol, Date startDate, Date endDate)
 		throws IOException
 	{
-		DivSplitTable dst = this.HistoricalDivSplits(symbol, startDate, endDate);
+		final DivSplitTable dst = this.HistoricalDivSplits(symbol, startDate, endDate);
 		return dst.SplitTable();
 	}
 
@@ -221,7 +222,7 @@ public class YahooFinance
 		String [] lines = csv.split("\n");
 		//System.out.println(csv);
 
-		DivSplitTable ret = new DivSplitTable(lines.length);
+		final DivSplitTable ret = new DivSplitTable(lines.length);
 		ret.symbol = symbol;
 		ret.dateAccessed = System.currentTimeMillis();
 

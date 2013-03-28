@@ -47,6 +47,7 @@ public final class MathUtils {
 		}
 	}
 
+	// TODO get rid of garbage
 	public static final LinearRegression regress(final double [] x, final double [] y)
 	{
 		final double intercept, slope;
@@ -59,13 +60,17 @@ public final class MathUtils {
 		return new LinearRegression(intercept,slope);
 	}
 
-	// Faster and more correct (round towards zero instead of round towards infinity) than java.lang.Math.round.
+	// Faster and more correct (round away from zero instead of round towards +infinity) than java.lang.Math.round.
+	private static final long ONE_HALF = Double.doubleToRawLongBits(0.5); // bits of 0.5
 	public final static long round(final double d)
 	{
-		if (d > 0)
-			return (long)(d+0.5);
-		return
-			(long)(d-0.5);
+		final long l = ONE_HALF | sign(d); // equivalent to d < 0 ? -0.5 : 0.5;
+		return (long)(d + Double.longBitsToDouble(l));
+	}
+	// returns 1L<<63 if d < 0 and 0 otherwise
+	public static final long sign(final double d)
+	{
+		return Double.doubleToRawLongBits(d) & Long.MIN_VALUE;
 	}
 
 	public final static long[] round(final double[] d)
@@ -109,7 +114,7 @@ public final class MathUtils {
 		if (values.length==0) return Double.NaN;
 		double ret = values[0];
 		for (int i = values.length; i--!=0;)
-			if (ret < values[i])
+			if (values[i] > ret)
 				ret = values[i];
 		return ret;
 	}
@@ -119,7 +124,7 @@ public final class MathUtils {
 		if (values.length==0) return Integer.MIN_VALUE;
 		int ret = values[0];
 		for (int i = values.length; i--!=0;)
-			if (ret < values[i])
+			if (values[i] > ret)
 				ret = values[i];
 		return ret;
 	}
@@ -260,7 +265,7 @@ public final class MathUtils {
 	// it has a bug in it and spits out wrong answers sometimes.
 	// (I think the bug is in how it handles division and
 	// repeating rational numbers
-	final static double varianceSlow(final double[] data)
+	private final static double varianceSlow(final double[] data)
 	{
 		BigDecimal mean = new BigDecimal(0);
 		for (double x : data)
@@ -408,9 +413,23 @@ public final class MathUtils {
 	{
 		return Double.longBitsToDouble(Long.MAX_VALUE & Double.doubleToRawLongBits(d));
 	}
+	public static final float abs(final float f)
+	{
+		return Float.intBitsToFloat(Integer.MAX_VALUE & Float.floatToRawIntBits(f));
+	}
+	public static final long abs(final long l)
+	{
+		final long sign = l>>>63;
+		return (l^(~sign+1)) + sign;
+	}
+	public static final int abs(final int i)
+	{
+		final int sign = i>>>63;
+		return (i^(~sign+1)) + sign;
+	}
 
 	// Implementation of sum which is both more numerically
-	// precise _and faster_ than the naive implementation
+	// stable _and faster_ than the naive implementation
 	// which is used in all standard numerical libraries I know of:
 	// Colt, OpenGamma, Apache Commons Math, EJML.
 	//
@@ -450,7 +469,8 @@ public final class MathUtils {
 	}
 
 	// Naive implementation of sum which is faster than MathUtils.sum().
-	// Note that it may not agree with your implementation
+	// Generally exhibits rounding error which grows with the length of the sum
+	// Note that it may not agree with other implementations
 	// due to optimizations which change the order of iteration
 	// which can affect the rounding error.
 	// It is O(n) in the length of the array to be summed.
@@ -508,7 +528,7 @@ public final class MathUtils {
 	}
 
 	// Returns the number of bits required to represent d
-	// by counting the number of bits in the mantissa.
+	// by counting the number of trailing zeros in the mantissa.
 	public static final int precision(final double d)
 	{
 		final long l = Double.doubleToLongBits(d);
@@ -663,11 +683,11 @@ public final class MathUtils {
 		if (x.length!=y.length)
 			throw new ArrayIndexOutOfBoundsException("Dot product of vectors with different lengths!");
 		double ret = 0;
-		final int unroll = 1;
+		final int unroll = 3;
 		final int len = x.length - x.length%unroll;
 		int i = 0;
 		for (; i < len; i+=unroll)
-			ret+= x[i]*y[i];// + x[i+1]*y[i+1] + x[i+2]*y[i+2];
+			ret+= x[i]*y[i] + x[i+1]*y[i+1] + x[i+2]*y[i+2];
 		// get the terms at the end
 		for (; i < x.length; i++)
 			ret += x[i]*y[i];

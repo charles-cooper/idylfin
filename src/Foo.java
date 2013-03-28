@@ -50,7 +50,11 @@ public class Foo {
 	{
 		//return FastMath.getExponent(d);
 		//return getExponent(d);
-		return FastMath.abs(d);
+		return FastMath.round(d);
+	}
+	public static final double round(final double d)
+	{
+		return MathUtils.round(d);
 	}
 
 	public static int getExponent(final double d)
@@ -61,19 +65,21 @@ public class Foo {
 	{
 		System.out.println(Long.toHexString(Long.MAX_VALUE));
 		final Random r = new Random();
-		final int len = 1000*1000*100;
+		final int len = 1000*1000*40;
 		System.out.println(FastMath.abs(-100.0f));
 		System.out.println(FastMath.abs(100.0f));
+		System.out.println(FastMath.round(0.5));
+		System.out.println(FastMath.round(-0.5));
 		for (int i = 0; i < len; i++)
 		{
-			long l = r.nextLong();
-			if (Math.abs(l)!=FastMath.abs(l))
-				throw new RuntimeException("long! "+Long.toHexString(Math.abs(l))+" "+Long.toHexString(FastMath.abs(l)));
+			//long l = r.nextLong();
+			//if (Math.abs(l)!=FastMath.abs(l))
+			//	throw new RuntimeException("long! "+Long.toHexString(Math.abs(l))+" "+Long.toHexString(FastMath.abs(l)));
+			double d = 10*(r.nextDouble() - .5);
+			if (FastMath.round(d) != MathUtils.round(d))
+				throw new RuntimeException("double "+FastMath.round(d)+" "+MathUtils.round(d));
 		}
 
-		//final long[]data = new long[len];
-		//for (int i = len; i--!=0;)
-		//	data[i] = r.nextLong();
 		final double[] data = new double[len];
 		for (int i = 0; i < len; ++i) data[i] = Math.random() - .5;
 
