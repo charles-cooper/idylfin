@@ -1,4 +1,5 @@
-Get rid of Apache / GRAL /Jsoup dependencies
+Minimize dependencies
 Options data / pricing
 Portfolio optimization
+Write javadoc
 
