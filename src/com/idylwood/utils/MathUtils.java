@@ -541,7 +541,7 @@ public final class MathUtils {
 	public static final int precision(final double d)
 	{
 		final long l = Double.doubleToLongBits(d);
-		return max(0,53 - Long.numberOfTrailingZeros(l));
+		return Math.max(0,(53 - Long.numberOfTrailingZeros(l)));
 	}
 
 	// Implementation which uses a BigDecimal for the accumulator
@@ -639,6 +639,7 @@ public final class MathUtils {
 			this.data = new double[rows*cols];
 			if (init) Arrays.fill(data, 0);
 		}
+
 		public Matrix(int rows, int cols)
 		{
 			this(rows,cols,false);
@@ -875,14 +876,14 @@ public final class MathUtils {
 	// But can be up to 30% faster if the JIT doesn't optimize those functions
 	public static final double[] copyOf(final double[] data)
 	{
-		return copyOf(data,0,data.length);
+		return copyOfRange(data,0,data.length);
 	}
 
 	// Behavior is identical to calling Arrays.copyOfRange(data,start,end)
 	// But can be faster if JIT doesn't optimize Arrays.copyOfRange
 	public static final double[] copyOfRange(final double[]data, final int start, final int end)
 	{
-		final double ret[] = new double[len];
+		final double ret[] = new double[end - start];
 		for (int i = start; i < end / 3; ++i)
 		{
 			final int x = 3*i;

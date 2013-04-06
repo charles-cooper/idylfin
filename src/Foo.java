@@ -1,5 +1,7 @@
 import org.apache.commons.math3.util.FastMath;
 import com.idylwood.utils.MathUtils;
+import com.idylwood.utils.MathUtils.Matrix;
+
 import java.util.Random;
 public class Foo { 
 	private static final long HEX_40000000 = 0x40000000L; // 1073741824L
@@ -63,9 +65,21 @@ public class Foo {
 	}
 	public static void main(String [] args)
 	{
-		System.out.println(Long.toHexString(Long.MAX_VALUE));
 		final Random r = new Random();
-		final int len = 1000*1000*40;
+		final int len = 1000*1;
+		final double[][] one = new double[len][];
+		final double[][] two = new double[len][];
+		for (int i = 0; i < len; i++)
+		{
+			one[i] = MathUtils.random(len);
+			two[i] = MathUtils.random(len);
+		}
+		final Matrix mOne = new Matrix(one);
+		final Matrix mTwo = new Matrix(two);
+		MathUtils.matrixMultiply(mOne,mTwo);
+
+		if (true) return;
+
 		System.out.println(FastMath.abs(-100.0f));
 		System.out.println(FastMath.abs(100.0f));
 		System.out.println(FastMath.round(0.5));
