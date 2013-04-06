@@ -7,7 +7,7 @@ package com.opengamma.maths.lowlevelapi.datatypes.primitive;
 
 import java.util.Arrays;
 
-import org.apache.commons.lang.NotImplementedException;
+//import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.Validate;
 
 import com.opengamma.analytics.math.matrix.DoubleMatrix2D;
@@ -95,7 +95,7 @@ public class PackedMatrix implements MatrixPrimitive {
     Validate.notNull(aMatrix);
     // test if ragged
     if (MatrixPrimitiveUtils.isRagged(aMatrix)) {
-      throw new NotImplementedException("Construction from ragged array not implemented");
+      //throw new NotImplementedException("Construction from ragged array not implemented");
     }
 
     _rows = rows;

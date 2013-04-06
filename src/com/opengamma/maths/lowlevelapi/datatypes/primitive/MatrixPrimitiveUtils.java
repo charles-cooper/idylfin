@@ -5,9 +5,6 @@
  */
 package com.opengamma.maths.lowlevelapi.datatypes.primitive;
 
-import static org.testng.AssertJUnit.assertNotNull;
-
-import org.apache.commons.lang.NotImplementedException;
 
 /**
  *
@@ -199,9 +196,9 @@ public class MatrixPrimitiveUtils {
    * @param aMatrix which is the array of arrays to be manipulated
    * @return a double array of arrays with the lower triangle set to zero
    */
-  public static double[][] removeLowerTriangle(double[][] aMatrix) throws  IllegalArgumentException, NotImplementedException {
+  public static double[][] removeLowerTriangle(double[][] aMatrix) throws  IllegalArgumentException {
     if (isRagged(aMatrix)) {
-      throw new NotImplementedException("Construction from ragged array is not implemented");
+      throw new RuntimeException("Construction from ragged array is not implemented");
     }
     if (!isSquare(aMatrix)) {
       throw new IllegalArgumentException("Matrix is not square so removing lower triangle isn't clear cut enough to be implemented");
@@ -443,8 +440,8 @@ public class MatrixPrimitiveUtils {
    * @return boolean, true if matrix is N-Diagonal, false if matrix is not.
    * @throws IllegalArgumentException
    */
-  public static boolean isNDiag(double[][] aMatrix, int n) throws IllegalArgumentException, NotImplementedException {
-    assertNotNull(aMatrix);
+  public static boolean isNDiag(double[][] aMatrix, int n) throws IllegalArgumentException {
+    //assertNotNull(aMatrix);
     if (isEven(n) || n < 1) {
       throw new IllegalArgumentException("Matrix bandwidth must be odd (as in an odd number of bands) AND positive");
     }

@@ -7,7 +7,7 @@ package com.opengamma.maths.lowlevelapi.functions.utilities;
 
 import java.util.Arrays;
 
-import org.apache.commons.lang.Validate;
+//import org.apache.commons.lang.//Validate;
 
 /**
  * Uniques a vector. i.e. parses a vector and removes repeat values.
@@ -23,7 +23,7 @@ public final class Unique {
    * @return the int[] uniqued data
    */
   public static int[] bitwise(int[] data) {
-    Validate.notNull(data);
+    //Validate.notNull(data);
     int n = data.length;
     int[] sorteddata = Sort.stateless(data);
     int j = 0;
@@ -42,7 +42,7 @@ public final class Unique {
    * @return the long[] uniqued data
    */
   public static long[] bitwise(long[] data) {
-    Validate.notNull(data);
+    //Validate.notNull(data);
     int n = data.length;
     long[] sorteddata = Sort.stateless(data);
     int j = 0;
@@ -63,7 +63,7 @@ public final class Unique {
    * @return the float[] uniqued data
    */
   public static float[] bitwise(float[] data) {
-    Validate.notNull(data);
+    //Validate.notNull(data);
     int n = data.length;
     float[] sorteddata = Sort.stateless(data);
     int j = 0;
@@ -93,7 +93,7 @@ public final class Unique {
  * @return the float[] uniqued data
  */
   public static float[] byTol(float[] data, float tol) {
-    Validate.notNull(data);
+    //Validate.notNull(data);
     int n = data.length;
     float[] sorteddata = Sort.stateless(data);
     int j = 0;
@@ -114,7 +114,7 @@ public final class Unique {
    * @return the double[] uniqued data
    */
   public static double[] bitwise(double[] data) {
-    Validate.notNull(data);
+    //Validate.notNull(data);
     int n = data.length;
     double[] sorteddata = Sort.stateless(data);
     int j = 0;
@@ -144,7 +144,7 @@ public final class Unique {
  * @return the double[] uniqued data
  */
   public static double[] byTol(double[] data, double tol) {
-    Validate.notNull(data);
+    //Validate.notNull(data);
     int n = data.length;
     double[] sorteddata = Sort.stateless(data);
     int j = 0;

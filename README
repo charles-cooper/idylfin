@@ -7,9 +7,9 @@ Goal:
 To provide a wrapper to Yahoo Finance API as well as a library consisting of financial, statistical and numerical methods to analyze the data.
 
 Features:
-Pure 100% Java implementation
-Fast -- some numerical methods are more than 7 TIMES faster than their JBLAS (which is a wrapper to native BLAS code) counterparts
-Numerically stable
+Pure 100% Java implementation which is fast _and_ numerically stable
+Fast -- e.g. matrix vector multiplication is 10% faster than OpenGamma BLAS port to Java
+Numerically stable -- no other Java numerics library is implemented with numerical stability in mind
 Thread safe design
 Lightweight
 

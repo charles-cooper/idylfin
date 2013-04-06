@@ -5,10 +5,10 @@
  */
 package com.opengamma.maths.lowlevelapi.linearalgebra.blas;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
+//import static org.testng.AssertJUnit.//assertEquals;
+//import static org.testng.AssertJUnit.//assertNotNull;
 
-import org.apache.commons.lang.Validate;
+//import org.apache.commons.lang.//Validate;
 
 import com.opengamma.analytics.math.matrix.DoubleMatrix1D;
 
@@ -42,11 +42,11 @@ public class BLAS1 {
    * @param v2 double[] is the vector to be tested (y)
    */
   public static void daxpyInputSanityChecker(double[] v1, double[] v2) {
-    assertNotNull(v1); // check not null
-    assertNotNull(v2); // check not null
+    //assertNotNull(v1); // check not null
+    //assertNotNull(v2); // check not null
     final int xlen = v1.length;
     final int ylen = v2.length;
-    assertEquals(xlen, ylen); // going to struggle singleton addition unless the vectors are the same length
+    //assertEquals(xlen, ylen); // going to struggle singleton addition unless the vectors are the same length
   }
 
   /**
@@ -351,7 +351,7 @@ public class BLAS1 {
    * @return tmp a double[] vector
    */
   public static double[] dscal(double alpha, double[] x) {
-    Validate.notNull(x);
+    ////Validate.notNull(x);
     final int n = x.length;
     double[] tmp = new double[n];
     final int extra = n - n % 16;
@@ -400,7 +400,7 @@ public class BLAS1 {
    * @param x a double[] vector
    */
   public static void dscalInplace(double alpha, double[] x) {
-    Validate.notNull(x);
+    ////Validate.notNull(x);
     final int n = x.length;
     final int extra = n - n % 16;
     final int ub = ((n / 16) * 16) - 1;
@@ -457,9 +457,9 @@ public class BLAS1 {
    * @param y a double vector
    */
   public static void dswapInplace(double[] x, double[] y) {
-    Validate.notNull(x);
-    Validate.notNull(y);
-    Validate.isTrue(x.length == y.length);
+    ////Validate.notNull(x);
+    ////Validate.notNull(y);
+    ////Validate.isTrue(x.length == y.length);
     final int n = x.length;
     double[] tmp = new double[n];
     System.arraycopy(x, 0, tmp, 0, n);
@@ -512,9 +512,9 @@ public class BLAS1 {
    * @param y a vector
    */
   public static void dcopyInplace(double[] x, double[] y) {
-    Validate.notNull(x);
-    Validate.notNull(y);
-    Validate.isTrue(x.length == y.length);
+    //Validate.notNull(x);
+    //Validate.notNull(y);
+    //Validate.isTrue(x.length == y.length);
     System.arraycopy(y, 0, x, 0, x.length);
   }
 
@@ -565,9 +565,9 @@ public class BLAS1 {
    * @return tmp the dot product of x and y.
    */
   public static double ddot(double[] x, double[] y) {
-    Validate.notNull(x);
-    Validate.notNull(y);
-    Validate.isTrue(x.length == y.length);
+    //Validate.notNull(x);
+    //Validate.notNull(y);
+    //Validate.isTrue(x.length == y.length);
     final int n = x.length;
     double tmp = 0d;
     for (int i = 0; i < n; i++) {
@@ -629,7 +629,7 @@ public class BLAS1 {
    * @return tmp the 2-norm of x.
    */
   public static double dnrm2(double[] x) {
-    Validate.notNull(x);
+    //Validate.notNull(x);
     final int n = x.length;
     double tmp = 0d;
     for (int i = 0; i < n; i++) {
@@ -671,7 +671,7 @@ public class BLAS1 {
    * @return tmp the vector reduction (sum) of x.
    */
   public static double dasum(double[] x) {
-    Validate.notNull(x);
+    //Validate.notNull(x);
     final int n = x.length;
     double tmp = 0d;
     for (int i = 0; i < n; i++) {
@@ -711,7 +711,7 @@ public class BLAS1 {
    * @return idx the first index at which the maximum value occurs 
    */
   public static int idmax(double[] x) {
-    Validate.notNull(x);
+    //Validate.notNull(x);
     double max = Double.MIN_VALUE;
     int idx = -1;
     final int n = x.length;

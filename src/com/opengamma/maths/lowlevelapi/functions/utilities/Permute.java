@@ -5,9 +5,9 @@
  */
 package com.opengamma.maths.lowlevelapi.functions.utilities;
 
-import static org.testng.AssertJUnit.assertTrue;
+//import static org.testng.AssertJUnit.//assertTrue;
 
-import org.apache.commons.lang.Validate;
+//import org.apache.commons.lang.//Validate;
 
 /**
  * Applies a permutation to a given vector
@@ -39,13 +39,13 @@ public class Permute {
 
   /* checks the input */
   private static void inputValidator(int[] v, int[] p) {
-    Validate.notNull(v);
-    Validate.notNull(p);
-    assertTrue("Permutation is of length: " + p.length + " whereas vector is of length " + v.length + ". Permutation is therefore impossible.",
-        v.length == p.length); // shortcut costly parse tests if vectors are not the same length
-    assertTrue("Permutation contains indices with impossible range (too large)", Max.value(p) < v.length); // make sure the permutation won't go out of range.
-    assertTrue("Permutation doesn't contain index 0", Min.value(p) == 0); // make sure the permutation won't go out of range, also catches -ve indices
-    assertTrue("Permutation is nonunique (some indices are repeated)", Unique.bitwise(p).length == p.length); // make sure the permutation is a valid permutation.
+    //Validate.notNull(v);
+    //Validate.notNull(p);
+    //assertTrue("Permutation is of length: " + p.length + " whereas vector is of length " + v.length + ". Permutation is therefore impossible.",
+        //v.length == p.length); // shortcut costly parse tests if vectors are not the same length
+    //assertTrue("Permutation contains indices with impossible range (too large)", Max.value(p) < v.length); // make sure the permutation won't go out of range.
+    //assertTrue("Permutation doesn't contain index 0", Min.value(p) == 0); // make sure the permutation won't go out of range, also catches -ve indices
+    //assertTrue("Permutation is nonunique (some indices are repeated)", Unique.bitwise(p).length == p.length); // make sure the permutation is a valid permutation.
   }
 
   /* actually does the permutation, can proceed unchecked as validity is performed in the callers */
@@ -83,13 +83,13 @@ public class Permute {
 
   /* checks the input */
   private static void inputValidator(long[] v, int[] p) {
-    Validate.notNull(v);
-    Validate.notNull(p);
-    assertTrue("Permutation is of length: " + p.length + " whereas vector is of length " + v.length + ". Permutation is therefore impossible.",
-        v.length == p.length); // shortcut costly parse tests if vectors are not the same length
-    assertTrue("Permutation contains indices with impossible range (too large)", Max.value(p) < v.length); // make sure the permutation won't go out of range.
-    assertTrue("Permutation doesn't contain index 0", Min.value(p) == 0); // make sure the permutation won't go out of range, also catches -ve indices
-    assertTrue("Permutation is nonunique (some indices are repeated)", Unique.bitwise(p).length == p.length); // make sure the permutation is a valid permutation.
+    //Validate.notNull(v);
+    //Validate.notNull(p);
+    //assertTrue("Permutation is of length: " + p.length + " whereas vector is of length " + v.length + ". Permutation is therefore impossible.",
+     //   v.length == p.length); // shortcut costly parse tests if vectors are not the same length
+    //assertTrue("Permutation contains indices with impossible range (too large)", Max.value(p) < v.length); // make sure the permutation won't go out of range.
+    //assertTrue("Permutation doesn't contain index 0", Min.value(p) == 0); // make sure the permutation won't go out of range, also catches -ve indices
+    //assertTrue("Permutation is nonunique (some indices are repeated)", Unique.bitwise(p).length == p.length); // make sure the permutation is a valid permutation.
   }
 
   /* actually does the permutation, can proceed unchecked as validity is performed in the callers */
@@ -127,13 +127,13 @@ public class Permute {
 
   /* checks the input */
   private static void inputValidator(float[] v, int[] p) {
-    Validate.notNull(v);
-    Validate.notNull(p);
-    assertTrue("Permutation is of length: " + p.length + " whereas vector is of length " + v.length + ". Permutation is therefore impossible.",
-        v.length == p.length); // shortcut costly parse tests if vectors are not the same length
-    assertTrue("Permutation contains indices with impossible range (too large)", Max.value(p) < v.length); // make sure the permutation won't go out of range.
-    assertTrue("Permutation doesn't contain index 0", Min.value(p) == 0); // make sure the permutation won't go out of range, also catches -ve indices
-    assertTrue("Permutation is nonunique (some indices are repeated)", Unique.bitwise(p).length == p.length); // make sure the permutation is a valid permutation.
+    //Validate.notNull(v);
+    //Validate.notNull(p);
+    //assertTrue("Permutation is of length: " + p.length + " whereas vector is of length " + v.length + ". Permutation is therefore impossible.",
+        //v.length == p.length); // shortcut costly parse tests if vectors are not the same length
+    //assertTrue("Permutation contains indices with impossible range (too large)", Max.value(p) < v.length); // make sure the permutation won't go out of range.
+    //assertTrue("Permutation doesn't contain index 0", Min.value(p) == 0); // make sure the permutation won't go out of range, also catches -ve indices
+    //assertTrue("Permutation is nonunique (some indices are repeated)", Unique.bitwise(p).length == p.length); // make sure the permutation is a valid permutation.
   }
 
   /* actually does the permutation, can proceed unchecked as validity is performed in the callers */
@@ -171,13 +171,13 @@ public class Permute {
 
   /* checks the input */
   private static void inputValidator(double[] v, int[] p) {
-    Validate.notNull(v);
-    Validate.notNull(p);
-    assertTrue("Permutation is of length: " + p.length + " whereas vector is of length " + v.length + ". Permutation is therefore impossible.",
-        v.length == p.length); // shortcut costly parse tests if vectors are not the same length
-    assertTrue("Permutation contains indices with impossible range (too large)", Max.value(p) < v.length); // make sure the permutation won't go out of range.
-    assertTrue("Permutation doesn't contain index 0", Min.value(p) == 0); // make sure the permutation won't go out of range, also catches -ve indices
-    assertTrue("Permutation is nonunique (some indices are repeated)", Unique.bitwise(p).length == p.length); // make sure the permutation is a valid permutation.
+    //Validate.notNull(v);
+    //Validate.notNull(p);
+    //assertTrue("Permutation is of length: " + p.length + " whereas vector is of length " + v.length + ". Permutation is therefore impossible.",
+        //v.length == p.length); // shortcut costly parse tests if vectors are not the same length
+    //assertTrue("Permutation contains indices with impossible range (too large)", Max.value(p) < v.length); // make sure the permutation won't go out of range.
+    //assertTrue("Permutation doesn't contain index 0", Min.value(p) == 0); // make sure the permutation won't go out of range, also catches -ve indices
+    //assertTrue("Permutation is nonunique (some indices are repeated)", Unique.bitwise(p).length == p.length); // make sure the permutation is a valid permutation.
   }
 
   /* actually does the permutation, can proceed unchecked as validity is performed in the callers */

@@ -804,6 +804,26 @@ public final class MathUtils {
 		return ret;
 	}
 
+	public static final double[] matrixMultiplyFast(final Matrix matrix, final double[] vector)
+	{
+		final double []ret = new double[matrix.rows()];
+		for (int i = 0; i < matrix.rows(); i++)
+		{
+			ret[i] = linearCombinationFast(matrix.data(),vector,i*matrix.cols(),0,matrix.cols());
+		}
+		return ret;
+	}
+
+	public static final double[] matrixMultiply(final Matrix matrix, final double[] vector)
+	{
+		final double ret[] = new double[matrix.rows()];
+		for (int i = 0; i < matrix.rows(); i++)
+		{
+			ret[i] = linearCombinationFast(matrix.data(),vector,i*matrix.cols(),0,matrix.cols());
+		}
+		return ret;
+	}
+
 	// Numerically precise dot product. Returns MathUtils.sumSlow(MathUtils.multiply(x,y));
 	// O(n) time and O(n) space.
 	// TODO make if faster by not allocating new array in multiply().
@@ -814,21 +834,33 @@ public final class MathUtils {
 
 	// Faster but lower precision than linearCombination.
 	// Naive implementation.
-	static final double linearCombinationFast(final double []x, final double[]y)
+	public static final double linearCombinationFast(final double[]x, final double[]y)
 	{
 		if (x.length!=y.length)
 			throw new ArrayIndexOutOfBoundsException("Dot product of vectors with different lengths!");
+		return linearCombinationFast(x,y,0,0,x.length);
+	}
+	public static final double linearCombinationFast(final double []x, final double[]y, final int startOne, final int startTwo, final int len)
+	{
+		if (startOne + len > x.length || startTwo + len > y.length)
+			throw new ArrayIndexOutOfBoundsException("Bad length!");
 		double ret = 0;
 		final int unroll = 3;
-		final int len = x.length - x.length%unroll;
+		final int modLen = len - len%unroll;
 		int i = 0;
-		for (; i < len; i+=unroll)
-			ret+= x[i]*y[i]
-				+ x[i+1]*y[i+1]
-				+ x[i+2]*y[i+2];
+		for (; i < modLen; i+=unroll)
+		{
+			final int xPtr = i + startOne;
+			final int yPtr = i + startTwo;
+			ret+= x[xPtr]*y[yPtr]
+				+ x[xPtr+1]*y[yPtr+1]
+				+ x[xPtr+2]*y[yPtr+2];
+		}
 		// get the terms at the end
-		for (; i < x.length; i++)
-			ret += x[i]*y[i];
+		for (; i < len; i++)
+		{
+			ret += x[i+startOne]*y[i+startTwo];
+		}
 		return ret;
 	}
 

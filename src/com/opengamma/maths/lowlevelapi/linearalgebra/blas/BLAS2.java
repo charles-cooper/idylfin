@@ -5,13 +5,13 @@
  */
 package com.opengamma.maths.lowlevelapi.linearalgebra.blas;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
+//import static org.testng.AssertJUnit.//assertEquals;
+//import static org.testng.AssertJUnit.//assertNotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.Validate;
+//import org.apache.commons.lang.//Validate;
 
 import com.opengamma.analytics.math.matrix.DoubleMatrix1D;
 import com.opengamma.maths.highlevelapi.datatypes.primitive.OGArrayType;
@@ -89,9 +89,9 @@ public class BLAS2 {
   * @param aVector is the vector to be tested (x)
   */
   public static void dgemvInputSanityChecker(MatrixPrimitive aMatrix, double[] aVector) {
-    assertNotNull(aMatrix); // check not null
-    assertNotNull(aVector); // check not null
-    assertEquals(aMatrix.getNumberOfColumns(), aVector.length); // check commutable
+    //assertNotNull(aMatrix); // check not null
+    //assertNotNull(aVector); // check not null
+    //assertEquals(aMatrix.getNumberOfColumns(), aVector.length); // check commutable
   }
 
   /**
@@ -101,11 +101,11 @@ public class BLAS2 {
    * @param addToVector is the vector to be tested (y)
    */
   public static void dgemvInputSanityChecker(MatrixPrimitive aMatrix, double[] aVector, double[] addToVector) {
-    assertNotNull(aMatrix); // check not null
-    assertNotNull(aVector); // check not null
-    assertNotNull(addToVector); // check not null
-    assertEquals(aMatrix.getNumberOfColumns(), aVector.length); // check commutable
-    assertEquals(aMatrix.getNumberOfRows(), addToVector.length); // check commutable
+    //assertNotNull(aMatrix); // check not null
+    //assertNotNull(aVector); // check not null
+    //assertNotNull(addToVector); // check not null
+    //assertEquals(aMatrix.getNumberOfColumns(), aVector.length); // check commutable
+    //assertEquals(aMatrix.getNumberOfRows(), addToVector.length); // check commutable
   }
 
   /**
@@ -114,9 +114,9 @@ public class BLAS2 {
    * @param aVector is the vector to be tested (x)
    */
   public static void dgemvInputSanityCheckerTransposed(MatrixPrimitive aMatrix, double[] aVector) {
-    assertNotNull(aMatrix); // check not null
-    assertNotNull(aVector); // check not null
-    assertEquals(aMatrix.getNumberOfRows(), aVector.length); // check commutable
+    //assertNotNull(aMatrix); // check not null
+    //assertNotNull(aVector); // check not null
+    //assertEquals(aMatrix.getNumberOfRows(), aVector.length); // check commutable
   }
 
   /**
@@ -126,11 +126,11 @@ public class BLAS2 {
    * @param addToVector is the vector to be tested (y)
    */
   public static void dgemvInputSanityCheckerTransposed(MatrixPrimitive aMatrix, double[] aVector, double[] addToVector) {
-    assertNotNull(aMatrix); // check not null
-    assertNotNull(aVector); // check not null
-    assertNotNull(addToVector); // check not null
-    assertEquals(aMatrix.getNumberOfRows(), aVector.length); // check commutable
-    assertEquals(aMatrix.getNumberOfColumns(), addToVector.length); // check commutable
+    //assertNotNull(aMatrix); // check not null
+    //assertNotNull(aVector); // check not null
+    //assertNotNull(addToVector); // check not null
+    //assertEquals(aMatrix.getNumberOfRows(), aVector.length); // check commutable
+    //assertEquals(aMatrix.getNumberOfColumns(), addToVector.length); // check commutable
   }
 
   /**
@@ -140,11 +140,11 @@ public class BLAS2 {
    * @param aYVector is the vector to be tested for back assignment (y)
    */
   public static void dgemvInputSanityChecker(double[] aYVector, MatrixPrimitive aMatrix, double[] aVector) {
-    assertNotNull(aMatrix); // check not null
-    assertNotNull(aVector); // check not null
-    assertNotNull(aYVector); // check not null
-    assertEquals(aMatrix.getNumberOfColumns(), aVector.length); // check commutable
-    assertEquals(aMatrix.getNumberOfRows(), aYVector.length); // check commutable on back assignment
+    //assertNotNull(aMatrix); // check not null
+    //assertNotNull(aVector); // check not null
+    //assertNotNull(aYVector); // check not null
+    //assertEquals(aMatrix.getNumberOfColumns(), aVector.length); // check commutable
+    //assertEquals(aMatrix.getNumberOfRows(), aYVector.length); // check commutable on back assignment
   }
 
   /* Stateless manipulators on the Matrix implementing the MatrixPrimitive interface type */
@@ -161,7 +161,7 @@ public class BLAS2 {
   @SuppressWarnings("unchecked")
   public static <T extends MatrixPrimitive> double[] dgemv(T aMatrix, double[] aVector, BLAS2.orientation o) {
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     double[] tmp = null;
     switch (o) {
       case normal:
@@ -201,7 +201,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemv(T aMatrix, double[] aVector) {
     dgemvInputSanityChecker(aMatrix, aVector);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     return use.dm_stateless_A_times_x(aMatrix, aVector);
   }
 
@@ -227,7 +227,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemvTransposed(T aMatrix, double[] aVector) {
     dgemvInputSanityCheckerTransposed(aMatrix, aVector);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     return use.dm_stateless_AT_times_x(aMatrix, aVector);
   }
 
@@ -255,7 +255,7 @@ public class BLAS2 {
   @SuppressWarnings("unchecked")
   public static <T extends MatrixPrimitive> double[] dgemv(double alpha, T aMatrix, double[] aVector, BLAS2.orientation o) {
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     double[] tmp = null;
     switch (o) {
       case normal:
@@ -297,7 +297,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemv(double alpha, T aMatrix, double[] aVector) {
     dgemvInputSanityChecker(aMatrix, aVector);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     return use.dm_stateless_alpha_times_A_times_x(alpha, aMatrix, aVector);
   }
 
@@ -325,7 +325,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemvTransposed(double alpha, T aMatrix, double[] aVector) {
     dgemvInputSanityCheckerTransposed(aMatrix, aVector);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     return use.dm_stateless_alpha_times_AT_times_x(alpha, aMatrix, aVector);
   }
 
@@ -354,7 +354,7 @@ public class BLAS2 {
   @SuppressWarnings("unchecked")
   public static <T extends MatrixPrimitive> double[] dgemv(T aMatrix, double[] aVector, double[] y, BLAS2.orientation o) {
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     double[] tmp = null;
     switch (o) {
       case normal:
@@ -422,7 +422,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemv(T aMatrix, double[] aVector, double[] y) {
     dgemvInputSanityChecker(aMatrix, aVector, y);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     return use.dm_stateless_A_times_x_plus_y(aMatrix, aVector, y);
   }
 
@@ -474,7 +474,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemvTransposed(T aMatrix, double[] aVector, double[] y) {
     dgemvInputSanityCheckerTransposed(aMatrix, aVector, y);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     return use.dm_stateless_AT_times_x_plus_y(aMatrix, aVector, y);
   }
 
@@ -528,7 +528,7 @@ public class BLAS2 {
   @SuppressWarnings("unchecked")
   public static <T extends MatrixPrimitive> double[] dgemv(double alpha, T aMatrix, double[] aVector, double[] y, BLAS2.orientation o) {
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     double[] tmp = null;
     switch (o) {
       case normal:
@@ -600,7 +600,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemv(double alpha, T aMatrix, double[] aVector, double[] y) {
     dgemvInputSanityChecker(aMatrix, aVector, y);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     return use.dm_stateless_alpha_times_A_times_x_plus_y(alpha, aMatrix, aVector, y);
   }
 
@@ -656,7 +656,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemvTransposed(double alpha, T aMatrix, double[] aVector, double[] y) {
     dgemvInputSanityCheckerTransposed(aMatrix, aVector, y);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     return use.dm_stateless_alpha_times_AT_times_x_plus_y(alpha, aMatrix, aVector, y);
   }
 
@@ -713,7 +713,7 @@ public class BLAS2 {
   @SuppressWarnings("unchecked")
   public static <T extends MatrixPrimitive> double[] dgemv(T aMatrix, double[] aVector, double beta, double[] y, BLAS2.orientation o) {
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     double[] tmp = null;
     switch (o) {
       case normal:
@@ -785,7 +785,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemv(T aMatrix, double[] aVector, double beta, double[] y) {
     dgemvInputSanityChecker(aMatrix, aVector, y);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     return use.dm_stateless_A_times_x_plus_beta_times_y(aMatrix, aVector, beta, y);
   }
 
@@ -841,7 +841,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemvTransposed(T aMatrix, double[] aVector, double beta, double[] y) {
     dgemvInputSanityCheckerTransposed(aMatrix, aVector, y);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     return use.dm_stateless_AT_times_x_plus_beta_times_y(aMatrix, aVector, beta, y);
   }
 
@@ -900,7 +900,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemv(double alpha, T aMatrix, double[] aVector, double beta, double[] y, BLAS2.orientation o) {
     double[] tmp = null;
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     switch (o) {
       case normal:
         tmp = use.dm_stateless_alpha_times_A_times_x_plus_beta_times_y(alpha, aMatrix, aVector, beta, y);
@@ -973,7 +973,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemv(double alpha, T aMatrix, double[] aVector, double beta, double[] y) {
     dgemvInputSanityChecker(aMatrix, aVector, y);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     return use.dm_stateless_alpha_times_A_times_x_plus_beta_times_y(alpha, aMatrix, aVector, beta, y);
   }
 
@@ -1033,7 +1033,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> double[] dgemvTransposed(double alpha, T aMatrix, double[] aVector, double beta, double[] y) {
     dgemvInputSanityCheckerTransposed(aMatrix, aVector, y);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     return use.dm_stateless_alpha_times_AT_times_x_plus_beta_times_y(alpha, aMatrix, aVector, beta, y);
   }
 
@@ -1092,7 +1092,7 @@ public class BLAS2 {
   @SuppressWarnings("unchecked")
   public static <T extends MatrixPrimitive> void dgemvInPlace(double[] y, T aMatrix, double[] aVector, BLAS2.orientation o) {
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     switch (o) {
       case normal:
         dgemvInputSanityChecker(aMatrix, aVector, y);
@@ -1154,7 +1154,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> void dgemvInPlace(double[] y, T aMatrix, double[] aVector) {
     dgemvInputSanityChecker(y, aMatrix, aVector);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     use.dm_inplace_A_times_x(y, aMatrix, aVector);
   }
 
@@ -1202,7 +1202,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> void dgemvInPlaceTransposed(double[] y, T aMatrix, double[] aVector) {
     dgemvInputSanityCheckerTransposed(aMatrix, aVector, y);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     use.dm_inplace_AT_times_x(y, aMatrix, aVector);
   }
 
@@ -1281,7 +1281,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> void dgemvInPlace(double[] y, double alpha, T aMatrix, double beta, double[] aVector) {
     dgemvInputSanityChecker(y, aMatrix, aVector);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     if (Double.doubleToLongBits(alpha) == Double.doubleToLongBits(1)) {
       if (Double.doubleToLongBits(beta) == Double.doubleToLongBits(0)) {
         use.dm_inplace_A_times_x(y, aMatrix, aVector);
@@ -1445,7 +1445,7 @@ public class BLAS2 {
   public static <T extends MatrixPrimitive> void dgemvInPlaceTransposed(double[] y, double alpha, T aMatrix, double beta, double[] aVector) {
     dgemvInputSanityCheckerTransposed(aMatrix, aVector, y);
     BLAS2DGEMVKernelAbstraction<T> use = (BLAS2DGEMVKernelAbstraction<T>) s_dgemvFunctionPointers.get(aMatrix.getClass());
-    Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
+    //Validate.notNull(use, "BLAS2 DGEMV was called with an unknown Matrix type: " + aMatrix.getClass() + ". If this type is needed the implement a BLAS2DGEMVKernelAbstraction.");
     if (Double.doubleToLongBits(alpha) == Double.doubleToLongBits(1)) {
       if (Double.doubleToLongBits(beta) == Double.doubleToLongBits(0)) {
         use.dm_inplace_AT_times_x(y, aMatrix, aVector);

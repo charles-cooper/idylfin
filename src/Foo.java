@@ -1,6 +1,10 @@
 import org.apache.commons.math3.util.FastMath;
+
 import com.idylwood.utils.MathUtils;
 import com.idylwood.utils.MathUtils.Matrix;
+
+import com.opengamma.maths.lowlevelapi.linearalgebra.blas.BLAS2;
+import com.opengamma.maths.lowlevelapi.datatypes.primitive.DenseMatrix;
 
 import java.util.Random;
 public class Foo { 
@@ -66,7 +70,7 @@ public class Foo {
 	public static void main(String [] args)
 	{
 		final Random r = new Random();
-		final int len = 1000*1;
+		final int len = 1000*2;
 		final double[][] one = new double[len][];
 		final double[][] two = new double[len][];
 		for (int i = 0; i < len; i++)
@@ -77,6 +81,15 @@ public class Foo {
 		final Matrix mOne = new Matrix(one);
 		final Matrix mTwo = new Matrix(two);
 		MathUtils.matrixMultiply(mOne,mTwo);
+		final DenseMatrix dmOne = new DenseMatrix(one);
+		DenseMatrix dmTwo = new DenseMatrix(two);
+		logTime("Start");
+		for (int i = 0; i < len; i++)
+		{
+			//MathUtils.matrixMultiplyFast(mOne,two[i]);
+			BLAS2.dgemv(dmOne,two[i]);
+		}
+		logTime("one");
 
 		if (true) return;
 
