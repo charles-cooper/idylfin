@@ -86,8 +86,8 @@ public class Foo {
 		logTime("Start");
 		for (int i = 0; i < len; i++)
 		{
-			//MathUtils.matrixMultiplyFast(mOne,two[i]);
-			BLAS2.dgemv(dmOne,two[i]);
+			MathUtils.matrixMultiplyFast(mOne,two[i]);
+			//BLAS2.dgemv(dmOne,two[i]);
 		}
 		logTime("one");
 
