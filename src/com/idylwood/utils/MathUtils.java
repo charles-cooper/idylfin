@@ -4,7 +4,7 @@
  *
  * Developed at Idylwood Technologies, LLC.
  * Permission to use, copy, modify, and distribute this
- * software is freely granted, provided that this notice 
+ * software is freely granted, provided that this notice
  * is preserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +12,13 @@
  * The License should have been distributed to you with the source tree.
  * If not, it can be found at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Author: Charles Cooper
  * Date: 2013
  * ====================================================
@@ -29,7 +29,6 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Arrays;
 
-// Final so as to avoid vtables
 // This class contains a bunch of numerical methods which are intended to be fast and precise.
 // Several of the methods come in 'fast', 'normal' and 'slow' versions to give the end user
 // more control over the trade-off between accuracy and speed.
@@ -113,7 +112,7 @@ public final class MathUtils {
 	{
 		if (values.length==0) return Double.NaN;
 		double ret = values[0];
-		for (int i = values.length; i--!=0;)
+		for (int i = 1; i < values.length; i++)
 			if (values[i] > ret)
 				ret = values[i];
 		return ret;
@@ -123,8 +122,18 @@ public final class MathUtils {
 	{
 		if (values.length==0) return Integer.MIN_VALUE;
 		int ret = values[0];
-		for (int i = values.length; i--!=0;)
+		for (int i = 1; i < values.length; i++)
 			if (values[i] > ret)
+				ret = values[i];
+		return ret;
+	}
+
+	public final static double min(double... values)
+	{
+		if (values.length==0) return Double.NaN;
+		double ret = values[0];
+		for (int i = 1; i < values.length; i++)
+			if (values[i] < ret)
 				ret = values[i];
 		return ret;
 	}
@@ -254,7 +263,7 @@ public final class MathUtils {
 	// infinite precision but slow and there is no bound on how
 	// much memory it will need
 	final public static double meanArbPrec(final double data[])
-	{	BigDecimal mean = new BigDecimal(0);
+	{ BigDecimal mean = new BigDecimal(0);
 		for (double x : data)
 			mean = mean.add(new BigDecimal(x),MathContext.UNLIMITED);
 		mean = mean.divide(new BigDecimal(data.length),MathContext.UNLIMITED);
@@ -389,7 +398,7 @@ public final class MathUtils {
 	{
 		final double [] ret = new double[data.length];
 		for (int i = data.length; i--!=0;)
-			ret[i] = Math.max(data[i],0.0);
+			ret[i] = max(data[i],0.0);
 		return ret;
 	}
 
@@ -399,7 +408,7 @@ public final class MathUtils {
 	{
 		final double [] ret = new double[data.length];
 		for (int i = data.length; 0!=i--;)
-			ret[i] = Math.min(data[i],-0.0);
+			ret[i] = min(data[i],-0.0);
 		return ret;
 	}
 
@@ -532,7 +541,7 @@ public final class MathUtils {
 	public static final int precision(final double d)
 	{
 		final long l = Double.doubleToLongBits(d);
-		return Math.max(0,53 - Long.numberOfTrailingZeros(l));
+		return max(0,53 - Long.numberOfTrailingZeros(l));
 	}
 
 	// Implementation which uses a BigDecimal for the accumulator
@@ -556,33 +565,43 @@ public final class MathUtils {
 	// but much faster and with O(1) memory overhead.
 	// O(n) with O(1) space.
 	// Even faster than the naive implementation ;).
-	public static final double linearCombination(final double[]x, final double[]y)
+	public static final double linearCombination(final double[]x, final double[]y, final int startOne, final int startTwo, final int len)
 	{
 		//if (true) return MathUtils.sum(MathUtils.multiply(x,y));
-		if (x.length!=y.length)
-			throw new ArrayIndexOutOfBoundsException("Tried to take a dot product of"
-					+" two unequal length vectors!");
+		if (startOne + len > x.length || startTwo + len > y.length)
+			throw new ArrayIndexOutOfBoundsException("Vector indices don't make sense!");
 		final int unroll = 3; // don't blindly change this without changing the loop!
-		final int len = x.length - x.length%unroll;
+		final int modLen = len - len%unroll;
 		double sum = 0;
 		double err = 0;
 		int i = 0;
-		for (; i < len; i+= unroll)
+		for (; i < modLen; i+= unroll)
 		{
 			// this line depends on unroll variable.
-			final double prod = x[i]*y[i] + x[i+1]*y[i+1] + x[i+2]*y[i+2];
+			final int xPtr = i + startOne;
+			final int yPtr = i + startTwo;
+			final double prod = x[xPtr]*y[yPtr] + x[xPtr+1]*y[yPtr+1] + x[xPtr+2]*y[yPtr+2];
 			final double hi = sum + prod;
-			err += hi - sum - prod;
+			err += (hi - sum) - prod;
 			sum = hi;
 		}
-		for (; i < x.length; i++)
+		for (; i < len; i++)
 		{
-			final double prod = x[i]*y[i];
+			final int xPtr = i + startOne;
+			final int yPtr = i + startTwo;
+			final double prod = x[xPtr]*y[yPtr];
 			final double hi = sum + prod;
-			err += hi - sum - prod;
+			err += (hi - sum) - prod;
 			sum = hi;
 		}
 		return sum - err;
+	}
+
+	public static final double linearCombination(final double[]x, final double[] y)
+	{
+		if (x.length!=y.length)
+			throw new ArrayIndexOutOfBoundsException("Unequal length vectors!");
+		return linearCombination(x,y,0,0,x.length);
 	}
 
 	public static final double normSquared(final double[]x)
@@ -595,11 +614,89 @@ public final class MathUtils {
 		return Math.sqrt(normSquared(x));
 	}
 
-	public static final double[] extractColumn(final double[][] matrix, final int idx)
+	public static class Matrix {
+		private final double[] data;
+		private final int rows;
+		private final int cols;
+		public Matrix(double[][] data)
+		{
+			this(data.length, data[0].length);
+			for (int i = 0; i < rows; i++)
+			{
+				if (cols != data[i].length)
+					throw new ArrayIndexOutOfBoundsException("Illegal matrix: uneven number of columns.");
+				System.arraycopy(data[i], 0, this.data, i*cols, cols);
+			}
+		}
+		public int rows() { return this.rows; }
+		public double[] data() { return this.data; }
+		public int cols() { return this.cols; }
+
+		public Matrix(int rows, int cols, boolean init)
+		{
+			this.rows = rows;
+			this.cols = cols;
+			this.data = new double[rows*cols];
+			if (init) Arrays.fill(data, 0);
+		}
+		public Matrix(int rows, int cols)
+		{
+			this(rows,cols,false);
+		}
+
+		public int index(int row, int col)
+		{
+			return row * cols + col;
+		}
+		public double get(int row, int col)
+		{
+			return data[index(row,col)];
+		}
+		public void set(int row, int col, double val)
+		{
+			data[index(row,col)] = val;
+		}
+		public void increment(int row, int col, double incr)
+		{
+			data[index(row,col)] += incr;
+		}
+		public double[] extractColumn(int col)
+		{
+			final double[] ret = new double[rows];
+			for (int i = 0; i < rows; i++)
+			{
+				ret[i] = get(i,col);
+			}
+			return ret;
+		}
+		public double[] extractRow(int row)
+		{
+			return Arrays.copyOfRange(data,row*cols,(row+1)*cols);
+		}
+	}
+
+	public static final Matrix matrixMultiply(final Matrix first, final Matrix second)
+	{
+		if (first.cols()!=second.rows())
+			throw new ArrayIndexOutOfBoundsException("Trying to multiply matrices of different dimensions?!");
+		final Matrix ret = new Matrix(first.rows(), second.cols());
+		for (int i = 0; i < second.cols(); i++)
+		{
+			final double vector[] = second.extractColumn(i);
+			for (int j = 0; j < first.rows(); j++)
+			{
+				final double val = linearCombination(first.data(), vector, j*first.cols(), 0, first.cols());
+				ret.set(j, i, val);
+			}
+		}
+		return ret;
+	}
+
+	public static final double[] extractColumn(final double[][] matrix, final int col)
 	{
 		final double[] ret = new double[matrix[0].length];
 		for (int i = 0; i < matrix.length; i++)
-			ret[i] = matrix[i][idx];
+			ret[i] = matrix[i][col];
 		return ret;
 	}
 
@@ -615,7 +712,7 @@ public final class MathUtils {
 			throw new ArrayIndexOutOfBoundsException("Trying to multiply matrices of different dimensions?!");
 		final double ret[][] = new double[firstRows][secondCols];
 		for (int i = 0; i < secondCols; i++)
-		// iterate over columns so we can maintain cache locality!
+			// iterate over columns so we can maintain cache locality!
 		{
 			final double[] vector = extractColumn(second,i);
 			for (int k = 0; k < firstRows; k++)
@@ -623,6 +720,44 @@ public final class MathUtils {
 				ret[k][i] = linearCombination(first[k],vector);
 			}
 		}
+		return ret;
+	}
+
+	// attempt to be faster than matrixMultiply. failure.
+	public static final double[][] matrixMultiplyTwo(final double[][] first, final double[][] second)
+	{
+		final int firstRows = first.length;
+		final int firstCols = first[0].length;
+		final int secondRows = second.length;
+		final int secondCols = second[0].length;
+		if (firstCols!=secondRows)
+			throw new ArrayIndexOutOfBoundsException("Trying to multiply matrices of different dimensions?!");
+		final double ret[][] = new double[firstRows][secondCols];
+		final double err[][] = new double[firstRows][secondCols];
+
+		final int unroll = 3;
+		final int len = secondCols - secondCols%unroll;
+
+		for (int j = 0; j < firstRows; j++)
+		{
+			for (int i = 0; i < secondCols; i++)
+			{
+				Arrays.fill(ret[j],0);
+				Arrays.fill(err[j],0);
+				for (int k = 0; k < firstCols; k++)
+				{
+					final double prod = first[j][k] * second[k][i];
+					final double sum = ret[j][i];
+					final double hi = sum + prod;
+					ret[j][i] = hi;
+					err[j][i] += hi - sum - prod;
+				}
+			}
+		}
+
+		for (int i = 0; i < firstRows; i++)
+			for (int j = 0; j < secondCols; j++)
+				ret[i][j] -= err[i][j];
 		return ret;
 	}
 
@@ -687,7 +822,9 @@ public final class MathUtils {
 		final int len = x.length - x.length%unroll;
 		int i = 0;
 		for (; i < len; i+=unroll)
-			ret+= x[i]*y[i] + x[i+1]*y[i+1] + x[i+2]*y[i+2];
+			ret+= x[i]*y[i]
+				+ x[i+1]*y[i+1]
+				+ x[i+2]*y[i+2];
 		// get the terms at the end
 		for (; i < x.length; i++)
 			ret += x[i]*y[i];
@@ -736,19 +873,26 @@ public final class MathUtils {
 
 	// Behavior is identical to calling data.clone() or Arrays.copyOf(data)
 	// But can be up to 30% faster if the JIT doesn't optimize those functions
-	public static final double[] copyOf(final double[]data)
+	public static final double[] copyOf(final double[] data)
 	{
-		final double ret[] = new double[data.length];
-		for (int i = 0; i < data.length / 3; ++i)
+		return copyOf(data,0,data.length);
+	}
+
+	// Behavior is identical to calling Arrays.copyOfRange(data,start,end)
+	// But can be faster if JIT doesn't optimize Arrays.copyOfRange
+	public static final double[] copyOfRange(final double[]data, final int start, final int end)
+	{
+		final double ret[] = new double[len];
+		for (int i = start; i < end / 3; ++i)
 		{
 			final int x = 3*i;
-			ret[x] = data[x];
-			ret[x+1] = data[x+1];
-			ret[x+2] = data[x+2];
+			ret[x] = data[x+ start];
+			ret[x+1] = data[x+1 + start];
+			ret[x+2] = data[x+2 + start];
 		}
 		// Don't care about extra copies if data.length%3==0
-		ret[data.length-1] = data[data.length-1];
-		ret[data.length-2] = data[data.length-2];
+		ret[ret.length-2] = data[end-2];
+		ret[ret.length-1] = data[end-1];
 		return ret;
 	}
 
@@ -808,5 +952,4 @@ public final class MathUtils {
 		logTime("mine");
 	}
 }
-
 
