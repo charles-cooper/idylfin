@@ -351,8 +351,10 @@ public class YahooFinance
 
 	static long time = 0;
 	// helper function
-	static public void logTime(String msg) {
-		final long newTime = System.currentTimeMillis();
+	static public void logTime(String msg)
+	{
+		//final long newTime = System.currentTimeMillis();
+		final long newTime = System.nanoTime();
 		final long elapsed = newTime - time;
 		System.out.println(msg+" "+elapsed);
 		time = newTime;

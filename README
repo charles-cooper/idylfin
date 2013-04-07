@@ -8,7 +8,7 @@ To provide a wrapper to Yahoo Finance API as well as a library consisting of fin
 
 Features:
 Pure 100% Java implementation which is fast _and_ numerically stable
-Fast -- e.g. matrix vector multiplication is 10% faster than OpenGamma BLAS port to Java
+Fast -- e.g. matrix vector multiplication which is 10% faster than OpenGamma's Java BLAS implementation
 Numerically stable -- no other Java numerics library is implemented with numerical stability in mind
 Thread safe design
 Lightweight
@@ -18,12 +18,12 @@ Sharpe Ratio and other financial statistics
 Split and dividend adjustment
 
 Dependencies:
-IdylFin currently depends on Apache Commons Math, Jsoup and GRAL, forks of which are included in this source tree. In future versions the dependencies may be removed so that the code is self contained.
+IdylFin currently depends on Apache Commons Math, sections of OpenGamma, Jsoup and GRAL, forks of which are included in this source tree. In future versions the dependencies may be removed so that the code is self contained.
 
 License:
 Apache 2.0. You can view the terms of the license at http://www.apache.org/licenses/LICENSE-2.0.html. Idylwood Technologies is not responsible for any damages resulting from the use or misuse of this code.
 
-Lead Commit:
+Lead Contributor:
 Charles Cooper
 
 Contributors:

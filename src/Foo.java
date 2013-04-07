@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 import org.apache.commons.math3.util.FastMath;
 
 import com.idylwood.utils.MathUtils;
@@ -70,7 +72,7 @@ public class Foo {
 	public static void main(String [] args)
 	{
 		final Random r = new Random();
-		final int len = 1000*2;
+		final int len = 1000*1;
 		final double[][] one = new double[len][];
 		final double[][] two = new double[len][];
 		for (int i = 0; i < len; i++)
@@ -78,18 +80,32 @@ public class Foo {
 			one[i] = MathUtils.random(len);
 			two[i] = MathUtils.random(len);
 		}
+		/*
 		final Matrix mOne = new Matrix(one);
 		final Matrix mTwo = new Matrix(two);
 		MathUtils.matrixMultiply(mOne,mTwo);
 		final DenseMatrix dmOne = new DenseMatrix(one);
 		DenseMatrix dmTwo = new DenseMatrix(two);
+		*/
 		logTime("Start");
+		double [] foo;
 		for (int i = 0; i < len; i++)
 		{
-			MathUtils.matrixMultiplyFast(mOne,two[i]);
+			//MathUtils.matrixMultiplyFast(mOne,two[i]);
 			//BLAS2.dgemv(dmOne,two[i]);
+			//mOne.extractColumn(i);
+			//foo = new double[len];
+			//Arrays.fill(foo,i);
+			MathUtils.sumFast(two[i]);
+			MathUtils.sumNaive(one[i]);
 		}
+		logTime("warmed up");
+		for (int i = 0; i < len; i++)
+			MathUtils.sumFast(one[i]);
 		logTime("one");
+		for (int i = 0; i < len; i++)
+			MathUtils.sumNaive(two[i]);
+		logTime("two");
 
 		if (true) return;
 
