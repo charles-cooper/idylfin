@@ -16,6 +16,7 @@ Lightweight
 API to Yahoo Finance
 Sharpe Ratio and other financial statistics
 Split and dividend adjustment
+Functionality which is similar to some R packages, but *much* faster (e.g. CVAR calulation which is around 70 TIMES faster!)
 
 Dependencies:
 IdylFin currently depends on Apache Commons Math, sections of OpenGamma, Jsoup and GRAL, forks of which are included in this source tree. In future versions the dependencies may be removed so that the code is self contained.

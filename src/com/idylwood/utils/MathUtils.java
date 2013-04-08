@@ -708,7 +708,7 @@ public final class MathUtils {
 		}
 		public double[] extractRow(int row)
 		{
-			return Arrays.copyOfRange(data,row*cols,(row+1)*cols);
+			return copyOfRange(data,row*cols,(row+1)*cols);
 		}
 	}
 
@@ -955,13 +955,15 @@ public final class MathUtils {
 	// But can be faster if JIT doesn't optimize Arrays.copyOfRange
 	public static final double[] copyOfRange(final double[]data, final int start, final int end)
 	{
-		final double ret[] = new double[end - start];
-		for (int i = start; i < end / 3; ++i)
+		if (end > data.length || start < 0)
+			throw new IllegalArgumentException("Bad array bounds!");
+		final double ret[] = new double[end-start];
+		for (int i = 0; i < (end-start)/3; i++)
 		{
-			final int x = 3*i;
-			ret[x] = data[x+ start];
-			ret[x+1] = data[x+1 + start];
-			ret[x+2] = data[x+2 + start];
+			final int x = i*3;
+			ret[x] = data[x+start];
+			ret[x+1] = data[x+1+start];
+			ret[x+2] = data[x+2+start];
 		}
 		// Don't care about extra copies if data.length%3==0
 		ret[ret.length-2] = data[end-2];

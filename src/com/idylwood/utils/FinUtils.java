@@ -236,14 +236,14 @@ public class FinUtils {
 	// Threshold must be between 0 and 1.
 	final public static double CVAR(double [] data, double threshold)
 	{
-		if (0.0 > threshold || 1.0 < threshold)
-			throw new ArithmeticException("Bad threshold parameter: "+threshold);
-		final double [] logReturns = MathUtils.diff(MathUtils.log(data));
-		Arrays.sort(logReturns);
-		int idx = (int)(threshold * data.length);
-		double [] underThreshold = Arrays.copyOfRange(logReturns,0,idx+1);
-		return MathUtils.sum(underThreshold);
+		if (0.0 >= threshold || 1.0 < threshold)
+			throw new IllegalArgumentException("Bad threshold parameter: "+threshold);
+		final double [] logReturns = MathUtils.sort(MathUtils.diff(MathUtils.log(data)));
+		int idx = (int)Math.ceil(threshold * logReturns.length); // ceiling
+		final double [] underThreshold = MathUtils.copyOfRange(logReturns,0,idx);
+		return MathUtils.sum(underThreshold) / underThreshold.length;
 	}
+
 	final public static double CVAR(final HistTable data, double threshold)
 	{
 		return CVAR(data.CloseArray(),threshold);
@@ -251,7 +251,7 @@ public class FinUtils {
 
 	// Pre: all the tables have the same start and end date and have the same
 	// number of rows.
-	// TODO make this public
+	// TODO make this work
 	final static double[] MarkowitzPortfolio(final java.util.List<HistTable> tables)
 	{
 		final double[][] data = new double[tables.size()][];
@@ -266,4 +266,17 @@ public class FinUtils {
 		final double riskTolerance = 0.15;
 		return OptimizationUtils.cvxSolve(covariance,returns,riskTolerance);
 	}
+
+	public static void main(String[] args)
+		throws java.io.IOException
+	{
+		YahooFinance.logTime("start");
+		YahooFinance.getInstance().HistoricalPrices("AAPL");
+		YahooFinance.logTime("downloaded");
+		double cvar = 0;
+		for (int i = 0; i < 1000; i++)
+			cvar = CVAR(YahooFinance.getInstance().HistoricalPrices("AAPL",new Date(20070101),new Date(20130405)),1);
+		YahooFinance.logTime("calculated "+cvar);
+	}
 }
+

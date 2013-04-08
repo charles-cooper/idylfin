@@ -270,7 +270,7 @@ public class YahooFinance
 	}
 
 	// Downloads stuff from Yahoo Finance
-	public HistTable HistoricalPrices(String symbol)
+	public HistTable DownloadHistoricalPrices(String symbol)
 		throws IOException
 	{
 		UrlBuilder ub = new UrlBuilder();
@@ -290,10 +290,7 @@ public class YahooFinance
 		return ret;
 	}
 
-
-	final static long TwentyFourHours = 1000L * 60 * 60 * 24; // millis in day
-	// choose better variable names
-	public HistTable HistoricalPrices(String symbol, Date startDate, Date endDate)
+	public final HistTable HistoricalPrices(String symbol)
 		throws IOException
 	{
 		HistTable ret = null;
@@ -307,12 +304,20 @@ public class YahooFinance
 			// If we don't have the table or it is old get a new one
 			if (null==ret || System.currentTimeMillis() - ret.dateAccessed > TwentyFourHours)
 			{
-				ret = HistoricalPrices(symbol);
+				ret = DownloadHistoricalPrices(symbol);
 				mTables.put(symbol,ret);
 			}
 		}
-		ret = ret.SubTable(startDate,endDate);
 		return ret;
+	}
+
+	final static long TwentyFourHours = 1000L * 60 * 60 * 24; // millis in day
+	// choose better variable names
+	public HistTable HistoricalPrices(String symbol, Date startDate, Date endDate)
+		throws IOException
+	{
+		final HistTable ret = HistoricalPrices(symbol);
+		return ret.SubTable(startDate,endDate);
 	}
 
 	private YahooFinance() {}
@@ -353,8 +358,8 @@ public class YahooFinance
 	// helper function
 	static public void logTime(String msg)
 	{
-		//final long newTime = System.currentTimeMillis();
-		final long newTime = System.nanoTime();
+		final long newTime = System.currentTimeMillis();
+		//final long newTime = System.nanoTime();
 		final long elapsed = newTime - time;
 		System.out.println(msg+" "+elapsed);
 		time = newTime;
