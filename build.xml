@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="idylfin" default="build" basedir=".">
 	<path id="project.class.path">
-		<fileset dir="bin/lib/" includes="**"/>
+		<!--fileset dir="bin/lib/" includes="**"/-->
 	</path>
 
 	<target name="libs" description="Copy libs to bin/lib">
 		<mkdir dir="bin/lib" />
-		<copy todir="bin/lib">
+		<!--copy todir="bin/lib">
 			<fileset file="jblas-1.2.3-SNAPSHOT.jar"/>
-		</copy>
+		</copy-->
 	</target>
 
 	<target name="javac" depends="libs" description="Compile java source to bytecode">

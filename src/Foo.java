@@ -72,22 +72,20 @@ public class Foo {
 	public static void main(String [] args)
 	{
 		final Random r = new Random();
-		final int len = 1000*1;
+		final int len = 1000*3;
 		final double[][] one = new double[len][];
 		final double[][] two = new double[len][];
 		for (int i = 0; i < len; i++)
 		{
-			one[i] = MathUtils.random(len);
-			two[i] = MathUtils.random(len);
+			one[i] = MathUtils.shift(MathUtils.random(len),-.5);
+			two[i] = MathUtils.shift(MathUtils.random(len),-.5);
 		}
-		/*
 		final Matrix mOne = new Matrix(one);
 		final Matrix mTwo = new Matrix(two);
-		MathUtils.matrixMultiply(mOne,mTwo);
 		final DenseMatrix dmOne = new DenseMatrix(one);
 		DenseMatrix dmTwo = new DenseMatrix(two);
-		*/
 		logTime("Start");
+		MathUtils.matrixMultiply(mOne,mTwo);
 		double [] foo;
 		for (int i = 0; i < len; i++)
 		{
@@ -96,15 +94,9 @@ public class Foo {
 			//mOne.extractColumn(i);
 			//foo = new double[len];
 			//Arrays.fill(foo,i);
-			MathUtils.sumFast(two[i]);
-			MathUtils.sumNaive(one[i]);
 		}
 		logTime("warmed up");
-		for (int i = 0; i < len; i++)
-			MathUtils.sumFast(one[i]);
-		logTime("one");
-		for (int i = 0; i < len; i++)
-			MathUtils.sumNaive(two[i]);
+		MathUtils.matrixMultiplyFast(mTwo,mOne);
 		logTime("two");
 
 		if (true) return;

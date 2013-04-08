@@ -731,6 +731,26 @@ public final class MathUtils {
 		return ret;
 	}
 
+	public static final Matrix matrixMultiplyFast(final Matrix first, final Matrix second)
+	{
+		if (first.cols()!=second.rows())
+			throw new ArrayIndexOutOfBoundsException("Trying to multiply matrices of different dimensions?!");
+		final Matrix ret = new Matrix(first.rows(), second.cols());
+		for (int i = 0; i < second.cols(); i++)
+		{
+			// extract the column beforehand to improve cache hits
+			// TODO think about extracting on fly to save cost of read
+			final double vector[] = new double[second.rows()];//second.extractColumn(i);
+			for (int j = 0; j < first.rows(); j++)
+			{
+				final double val = linearCombinationFast(first.data(), vector, j*first.cols(), 0, first.cols());
+				ret.set(j, i, val);
+			}
+		}
+		return ret;
+	}
+
+
 	public static final double[] extractColumn(final double[][] matrix, final int col)
 	{
 		final double[] ret = new double[matrix[0].length];
