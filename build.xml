@@ -13,7 +13,7 @@
 
 	<target name="javac" depends="libs" description="Compile java source to bytecode">
 		<mkdir dir="bin"/>
-		<javac srcdir="src" includes="**" encoding="utf-8"
+		<javac srcdir="src" includes="com/idylwood/**" encoding="utf-8"
 			destdir="bin/"
 			source="1.6" target="1.6" nowarn="false"
 			debug="true" debuglevel="lines,vars,source">
