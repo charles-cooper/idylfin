@@ -26,83 +26,76 @@
 
 package com.idylwood.yahoo;
 
-import java.net.URL;
-import java.util.Map;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
-// low level convenience class abstracting the yahoo url flags (so you don't have to memorize them)
-public class UrlBuilder
-{
-	public enum Type {
-		WEEKLY("w"), DAILY("d"), MONTHLY("m"), DIVIDEND("v");
-		private final String flag;
-		private Type(final String flag) { this.flag = flag; }
-		@Override public String toString() { return flag; }
-	}
+import com.idylwood.utils.IOUtils;
 
-	private Map<String,String> map = new HashMap<String,String>();
+public abstract class UrlBuilder {
 
-	public String baseUrl = "http://ichart.yahoo.com/table.csv?";
-	// for dividends/splits, baseUrl is http://ichart.yahoo.com/x.csv?
+	protected abstract String baseUrl();
 
-	public UrlBuilder() {}
-	public UrlBuilder(String symbol, Date start, Date end, Type type) {
-		setSymbol(symbol); setStartDate(start); setEndDate(end); setType(type);
-	}
-	public UrlBuilder(String symbol, Type type)
+	// want guaranteed traversal order.
+	// TODO figure out some way of making this immutable.
+	private final Map<String,String> map;
+
+	UrlBuilder()
 	{
-		setSymbol(symbol); setType(type);
+		this(new HashMap<String,String>());
+	}
+	UrlBuilder(Map<String,String> arg)
+	{
+		this.map = arg;
 	}
 
-	public void set(String K, String V) {
-		map.put(K,V);
+	// set to public so that everybody can access this at a low level
+	public final UrlBuilder set(String K, String V) {
+		map.put(K, V);
+		return this;
 	}
-	@Override public String toString() {
-		String ret = baseUrl;
+
+	// returns entry set with unguaranteed traversal order
+	public final java.util.Set<Map.Entry<String,String>> entrySet()
+	{
+		return map.entrySet();
+	}
+
+	// Removes the key and value from the url
+	public final UrlBuilder unset(String K)
+	{
+		map.remove(K);
+		return this;
+	}
+
+	// convenience wrapper method
+	public final String download()
+			throws MalformedURLException, IOException
+	{
+		return IOUtils.fromStream(toURL().openStream());
+	}
+
+	public final java.net.URL toURL()
+			throws java.net.MalformedURLException
+	{
+		return new java.net.URL(this.toString());
+	}
+
+	@Override public final String toString()
+	{
+		String ret = baseUrl();
+		int i = 0;
 		for (Map.Entry<String,String> entry : map.entrySet())
-			ret += entry.getKey()+"="+entry.getValue()+"&";
-		ret += "ignore=.csv";
+		{
+			if (i++==0)
+				ret += "?";
+			else
+				ret += "&";
+			ret += entry.getKey()+"="+entry.getValue();
+		}
 		return ret;
 	}
-	public java.net.URL toURL()
-		throws java.net.MalformedURLException
-	{
-		return new URL(this.toString());
-	}
-	public void setSymbol(String s) {
-		set("s",s);
-	}
-	public void setStartDate(Date d) {
-		// maybe don't need setday/month/year?
-		setStartDay(d.day);
-		setStartMonth(d.month-1); // January == 0
-		setStartYear(d.year);
-	}
-	public void setEndDate(Date d) {
-		setEndDay(d.day);
-		setEndMonth(d.month-1); // January == 0
-		setEndYear(d.year);
-	}
-	public void setStartDay(int day) {
-		set("b",Integer.toString(day));
-	}
-	public void setStartMonth(int month) {
-		set("a",Integer.toString(month));
-	}
-	public void setStartYear(int year) {
-		set("c",Integer.toString(year));
-	}
-	public void setEndDay(int day) {
-		set("e",Integer.toString(day));
-	}
-	public void setEndMonth(int month) {
-		set("d",Integer.toString(month));
-	}
-	public void setEndYear(int year) {
-		set("f",Integer.toString(year));
-	}
-	public void setType(Type t) {
-		set("g",t.toString());
-	}
-}
 
+}

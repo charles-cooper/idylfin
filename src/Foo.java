@@ -69,6 +69,13 @@ public class Foo {
 	{
 		return (int) ((Double.doubleToRawLongBits(d) >>> 52) & 0x7ff) - 1023;
 	}
+	public static int sumInts(final int[] values)
+	{
+		int ret = 0;
+		for (int i = 0; i < values.length; i++)
+			ret += values[i];
+		return ret;
+	}
 	public static void main(String [] args)
 	{
 		final Random r = new Random();

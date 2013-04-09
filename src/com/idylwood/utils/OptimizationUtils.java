@@ -1,4 +1,6 @@
-/* Copyright (C) 2013 by Idylwood Technologies, LLC. All rights reserved.
+/*
+ * ====================================================
+ * Copyright (C) 2013 by Idylwood Technologies, LLC. All rights reserved.
  *
  * Developed at Idylwood Technologies, LLC.
  * Permission to use, copy, modify, and distribute this
@@ -21,6 +23,7 @@
  * Date: 2013
  * ====================================================
  */
+
 
 package com.idylwood.utils;
 

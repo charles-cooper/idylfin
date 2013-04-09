@@ -28,7 +28,6 @@ package com.idylwood.yahoo;
 
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 
 import org.apache.commons.math3.stat.regression.*;
@@ -39,11 +38,9 @@ import de.erichseifert.gral.data.filters.Filter.Mode;
 
 import com.idylwood.*;
 import com.idylwood.utils.FinUtils;
-import com.idylwood.utils.MathUtils;
-import com.idylwood.utils.IOUtils;
 
 // Class intended to provide wrapper to Yahoo Finance API
-public class YahooFinance
+public final class YahooFinance
 {
 	final static public Date DEFAULT_START_DATE = new Date(20070101);
 	final Map<String,HistTable> mTables = new HashMap<String,HistTable>();
@@ -216,9 +213,9 @@ public class YahooFinance
 	private DivSplitTable HistoricalDivSplits(String symbol)
 		throws IOException
 	{
-		UrlBuilder ub = new UrlBuilder(symbol,UrlBuilder.Type.DIVIDEND);
-		ub.baseUrl = "http://ichart.yahoo.com/x?";
-		String csv = IOUtils.fromStream(new URL(ub.toString()).openStream());
+		String csv = new HistoricalUrlBuilder(symbol)
+			.setType(HistoricalUrlBuilder.Type.DIVIDEND)
+			.download();
 		String [] lines = csv.split("\n");
 		//System.out.println(csv);
 
@@ -273,11 +270,9 @@ public class YahooFinance
 	public HistTable DownloadHistoricalPrices(String symbol)
 		throws IOException
 	{
-		UrlBuilder ub = new UrlBuilder();
-		ub.setSymbol(symbol);
-		ub.setType(UrlBuilder.Type.DAILY);
-		URL url = ub.toURL();
-		String csv = IOUtils.fromStream(url.openStream());
+		String csv = new HistoricalUrlBuilder(symbol)
+			.setType(HistoricalUrlBuilder.Type.DAILY)
+			.download();
 
 		List<HistRow> list = new ArrayList<HistRow>();
 		String [] lines = csv.split("\n");
@@ -290,7 +285,7 @@ public class YahooFinance
 		return ret;
 	}
 
-	public final HistTable HistoricalPrices(String symbol)
+	public HistTable HistoricalPrices(String symbol)
 		throws IOException
 	{
 		HistTable ret = null;
@@ -423,6 +418,7 @@ public class YahooFinance
 		List<HistTable> tables = new ArrayList<HistTable>();
 		for (String symbol : symbols)
 			tables.add(yf.HistoricalPrices(symbol,start,today).AdjustOHLC());
+		System.out.println(tables.get(0).data);
 		/*
 		double[] weights = FinUtils.MarkowitzPortfolio(tables);
 		MathUtils.printArray(weights);

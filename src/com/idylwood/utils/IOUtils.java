@@ -49,15 +49,17 @@ public class IOUtils {
 		return fromStream(is,0);
 	}
 
-	public final static void Transfer(InputStream is, OutputStream os)
+	// Flushes the stream
+	public final static void Transfer(InputStream from, OutputStream to)
 		throws IOException
 	{
 		byte [] ba = new byte[1024];
 		int read = -1;
-		while ( -1 < (read = is.read(ba)) )
+		while ( -1 < (read = from.read(ba)) )
 		{
-			os.write(ba,0,read);
+			to.write(ba,0,read);
 		}
+		to.flush();
 	}
 }
 
