@@ -721,7 +721,7 @@ public final class MathUtils {
 		{
 			// extract the column beforehand to improve cache hits
 			// TODO think about extracting on fly to save cost of read
-			final double vector[] = new double[second.rows()];//second.extractColumn(i);
+			final double vector[] = second.extractColumn(i);
 			for (int j = 0; j < first.rows(); j++)
 			{
 				final double val = linearCombination(first.data(), vector, j*first.cols(), 0, first.cols());
@@ -740,7 +740,7 @@ public final class MathUtils {
 		{
 			// extract the column beforehand to improve cache hits
 			// TODO think about extracting on fly to save cost of read
-			final double vector[] = new double[second.rows()];//second.extractColumn(i);
+			final double vector[] = second.extractColumn(i);
 			for (int j = 0; j < first.rows(); j++)
 			{
 				final double val = linearCombinationFast(first.data(), vector, j*first.cols(), 0, first.cols());
