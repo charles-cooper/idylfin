@@ -7,8 +7,9 @@ Goal:
 To provide a wrapper to Yahoo Finance API as well as a library consisting of financial, statistical and numerical methods to analyze the data.
 
 Features:
+(Note: The linear algebra library is being moved to IdylBLAS)
 Pure 100% Java implementation which is fast _and_ numerically stable
-Fast -- e.g. matrix vector multiplication which is 10% faster than OpenGamma's Java BLAS implementation, and on par with R matrix multiplication
+Fast -- e.g. matrix vector multiplication which is significantly faster than OpenGamma's Java BLAS implementation.
 Numerically stable -- no other Java numerics library is implemented with numerical stability in mind
 Thread safe design
 Lightweight

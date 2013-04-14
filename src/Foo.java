@@ -79,31 +79,32 @@ public class Foo {
 	public static void main(String [] args)
 	{
 		final Random r = new Random();
-		final int len = 1000*3;
+		final int len = 1000;
 		final double[][] one = new double[len][];
 		final double[][] two = new double[len][];
 		for (int i = 0; i < len; i++)
 		{
-			one[i] = MathUtils.shift(MathUtils.random(len),-.5);
-			two[i] = MathUtils.shift(MathUtils.random(len),-.5);
+			one[i] = MathUtils.shift(MathUtils.random(len),0);
+			two[i] = MathUtils.shift(MathUtils.random(len),0);
 		}
 		final Matrix mOne = new Matrix(one);
 		final Matrix mTwo = new Matrix(two);
 		final DenseMatrix dmOne = new DenseMatrix(one);
 		DenseMatrix dmTwo = new DenseMatrix(two);
 		logTime("Start");
-		MathUtils.matrixMultiply(mOne,mTwo);
+		MathUtils.matrixMultiplyFast(mOne,mTwo);
 		double [] foo;
 		for (int i = 0; i < len; i++)
 		{
 			//MathUtils.matrixMultiplyFast(mOne,two[i]);
-			//BLAS2.dgemv(dmOne,two[i]);
+			BLAS3.dgemm(dmOne,dmTwo);
 			//mOne.extractColumn(i);
 			//foo = new double[len];
 			//Arrays.fill(foo,i);
 		}
 		logTime("warmed up");
-		MathUtils.matrixMultiplyFast(mTwo,mOne);
+		//MathUtils.matrixMultiplyFast(mTwo,mOne);
+
 		logTime("two");
 
 		if (true) return;
