@@ -26,10 +26,16 @@
 		</copy>
 	</target>
 
+	<property name="jarfile" value="idylfin.jar"/>
+	<target name="jar" depends="javac" description="Make a jar">
+		<jar destfile="${jarfile}" basedir="bin"/>
+	</target>
+
 	<target name="build" depends="javac" description="Build this project" />
 
 	<target name="clean" description="Cleans this project">
 		<delete dir="bin"/>
+		<delete file="${jarfile}"/>
 		<delete dir="." includes="**/*.class"/>
 	</target>
 </project>

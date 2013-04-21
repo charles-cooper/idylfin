@@ -258,11 +258,12 @@ public class FinUtils {
 		int i = 0;
 		for (HistTable ht : tables)
 			data[i++] = MathUtils.diff(MathUtils.log(ht.CloseArray())); // yay hammering malloc
+		final int row_len = data[0].length;
 
 		final double[][] covariance = MathUtils.covariance(data);
-		final double[] returns = new double[data.length];
+		final double[] returns = new double[data.length]; //==tables.size()
 		for (i = 0; i < returns.length; ++i)
-			returns[i] = totalLogReturn(data[i]);
+			returns[i] = data[i][row_len-1]-data[i][0]; //i.e. totalLogReturn(tables.get(i));
 		final double riskTolerance = 0.15;
 		return OptimizationUtils.cvxSolve(covariance,returns,riskTolerance);
 	}

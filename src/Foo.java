@@ -92,18 +92,21 @@ public class Foo {
 		final DenseMatrix dmOne = new DenseMatrix(one);
 		DenseMatrix dmTwo = new DenseMatrix(two);
 		logTime("Start");
-		MathUtils.matrixMultiplyFast(mOne,mTwo);
+		//MathUtils.matrixMultiplyFast(mOne,mTwo);
 		double [] foo;
 		for (int i = 0; i < len; i++)
 		{
-			//MathUtils.matrixMultiplyFast(mOne,two[i]);
-			BLAS3.dgemm(dmOne,dmTwo);
+			MathUtils.matrixMultiplyFast(mOne,two[i]);
+			//BLAS2.dgemv(dmOne,two[i]);
 			//mOne.extractColumn(i);
 			//foo = new double[len];
 			//Arrays.fill(foo,i);
 		}
 		logTime("warmed up");
 		//MathUtils.matrixMultiplyFast(mTwo,mOne);
+		for (int i = 0; i < len; i++)
+			//BLAS2.dgemv(dmTwo,one[i]);
+			MathUtils.matrixMultiplyFast(mTwo,one[i]);
 
 		logTime("two");
 
