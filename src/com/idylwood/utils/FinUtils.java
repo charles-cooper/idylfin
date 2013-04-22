@@ -25,6 +25,7 @@
  */
 package com.idylwood.utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -94,8 +95,9 @@ public class FinUtils {
 	}
 	
 	public static final double SharpeRatio(final HistTable data, final HistTable benchmark)
+		throws IOException
 	{
-		return SharpeRatio(data.CloseArray(), benchmark.CloseArray());
+		return SharpeRatio(data.AdjustOHLCWithReinvestment().CloseArray(), benchmark.AdjustOHLCWithReinvestment().CloseArray());
 	}
 
 	// assuming the riskFreeRate is constant and stuff
@@ -110,8 +112,9 @@ public class FinUtils {
 	}
 
 	public static final double SharpeRatio(final HistTable data, final double riskFreeRate)
+		throws IOException
 	{
-		return SharpeRatio(data.CloseArray(), riskFreeRate);
+		return SharpeRatio(data.AdjustOHLCWithReinvestment().CloseArray(), riskFreeRate);
 	}
 
 	// the new sharpe ratio is literally identical to the information ratio
@@ -121,8 +124,9 @@ public class FinUtils {
 	}
 	
 	final public static double InformationRatio(final HistTable data, final HistTable benchmark)
+		throws IOException
 	{
-		return InformationRatio(data.CloseArray(),benchmark.CloseArray());
+		return InformationRatio(data.AdjustOHLCWithReinvestment().CloseArray(),benchmark.AdjustOHLCWithReinvestment().CloseArray());
 	}
 
 	// TODO
@@ -145,10 +149,10 @@ public class FinUtils {
 		LinearRegression regress = MathUtils.regress(data,benchmark);
 		return MathUtils.sum(FinUtils.totalLogReturn(data),-riskFreeRate,-regress.slope * FinUtils.totalLogReturn(benchmark), regress.slope*riskFreeRate);
 	}
-	final public static double JensensAlpha(final HistTable data,
-			final HistTable benchmark, final double riskFreeRate)
+	final public static double JensensAlpha(final HistTable data, final HistTable benchmark, final double riskFreeRate)
+		throws IOException
 	{
-		return JensensAlpha(data.CloseArray(), benchmark.CloseArray(), riskFreeRate);
+		return JensensAlpha(data.AdjustOHLCWithReinvestment().CloseArray(), benchmark.AdjustOHLCWithReinvestment().CloseArray(), riskFreeRate);
 	}
 
 	// numerical precision not guaranteed
@@ -157,8 +161,9 @@ public class FinUtils {
 		return Math.log(FinUtils.totalReturn(data));
 	}
 	final public static double totalLogReturn(final HistTable data)
+		throws IOException
 	{
-		return totalLogReturn(data.CloseArray());
+		return totalLogReturn(data.AdjustOHLCWithReinvestment().CloseArray());
 	}
 
 	final public static double totalReturn(final double data[])
@@ -166,8 +171,9 @@ public class FinUtils {
 		return data[data.length-1] / data[0];
 	}
 	public static final double totalReturn(final HistTable data)
+		throws IOException
 	{
-		return totalReturn(data.CloseArray());
+		return totalReturn(data.AdjustOHLCWithReinvestment().CloseArray());
 	}
 
 	final public static double TreynorRatio(final double[] data, double [] benchmark)
@@ -178,8 +184,9 @@ public class FinUtils {
 		return MathUtils.mean(MathUtils.subtract(logReturns,benchmarkReturns)) / regress.slope;
 	}
 	public static final double TreynorRatio(final HistTable data, final HistTable benchmark)
+		throws IOException
 	{
-		return TreynorRatio(data.CloseArray(), benchmark.CloseArray());
+		return TreynorRatio(data.AdjustOHLCWithReinvestment().CloseArray(), benchmark.AdjustOHLCWithReinvestment().CloseArray());
 	}
 
 	final public static double CalmarRatio(final double[] data)
@@ -188,8 +195,9 @@ public class FinUtils {
 		return (averageDailyReturn * 250) / FinUtils.MaximumDrawdown(data);
 	}
 	public static final double CalmarRatio(final HistTable data)
+		throws IOException
 	{
-		return CalmarRatio(data.CloseArray());
+		return CalmarRatio(data.AdjustOHLCWithReinvestment().CloseArray());
 	}
 
 	// returns max drawdown in log percent
@@ -212,8 +220,9 @@ public class FinUtils {
 	}
 	
 	public final static double MaximumDrawdown(final HistTable data)
+		throws IOException
 	{
-		return MaximumDrawdown(data.CloseArray());
+		return MaximumDrawdown(data.AdjustOHLCWithReinvestment().CloseArray());
 	}
 
 	// returns empirical VAR as log percentage
@@ -228,8 +237,9 @@ public class FinUtils {
 	}
 	
 	final public static double VAR(final HistTable data, final double threshold)
+		throws IOException
 	{
-		return VAR(data.CloseArray(), threshold);
+		return VAR(data.AdjustOHLCWithReinvestment().CloseArray(), threshold);
 	}
 
 	// returns empirical CVAR as log percentage
@@ -245,19 +255,21 @@ public class FinUtils {
 	}
 
 	final public static double CVAR(final HistTable data, double threshold)
+		throws IOException
 	{
-		return CVAR(data.CloseArray(),threshold);
+		return CVAR(data.AdjustOHLCWithReinvestment().CloseArray(),threshold);
 	}
 
 	// Pre: all the tables have the same start and end date and have the same
 	// number of rows.
 	// TODO make this work
 	final static double[] MarkowitzPortfolio(final java.util.List<HistTable> tables)
+		throws IOException
 	{
 		final double[][] data = new double[tables.size()][];
 		int i = 0;
 		for (HistTable ht : tables)
-			data[i++] = MathUtils.diff(MathUtils.log(ht.CloseArray())); // yay hammering malloc
+			data[i++] = MathUtils.diff(MathUtils.log(ht.AdjustOHLCWithReinvestment().CloseArray())); // yay hammering malloc
 		final int row_len = data[0].length;
 
 		final double[][] covariance = MathUtils.covariance(data);
