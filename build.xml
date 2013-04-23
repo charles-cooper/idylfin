@@ -31,11 +31,20 @@
 		<jar destfile="${jarfile}" basedir="bin"/>
 	</target>
 
+	<property name="javadoc.dir" value="javadocs"/>
+	<!-- this is all broken!
+	<target name="javadoc" description="Generate Javadocs">
+		<javadoc sourcepath="src/com/idylwood" encoding="UTF-8" destdir="${javadoc.dir}">
+		</javadoc>
+	</target>
+	-->
+
 	<target name="build" depends="javac" description="Build this project" />
 
 	<target name="clean" description="Cleans this project">
 		<delete dir="bin"/>
 		<delete file="${jarfile}"/>
+		<delete dir="${javadoc.dir}"/>
 		<delete dir="." includes="**/*.class"/>
 	</target>
 </project>

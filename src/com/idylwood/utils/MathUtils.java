@@ -223,6 +223,7 @@ public final class MathUtils {
 
 	// This will not throw an exception if the arrays are not of equal length,
 	// it will return an array whose length is the smaller of the two array lengths
+	// TODO put error into an error
 	final public static double [] subtract(final double[] first, final double[] second)
 	{
 		final int len = Math.min(first.length,second.length);
@@ -242,7 +243,7 @@ public final class MathUtils {
 	}
 
 	// Returns newly allocated array.
-	final public static double [] multiply(final double [] first, final double[] second)
+	final public static double[] multiply(final double [] first, final double[] second)
 	{
 		final int len = first.length;
 		if (len!=second.length)
@@ -254,7 +255,7 @@ public final class MathUtils {
 	}
 
 	// takes the log of every element of the data
-	final public static double [] log(final double[] data)
+	final public static double[] log(final double[] data)
 	{
 		final double [] ret = new double[data.length];
 		for (int i = data.length; i-- != 0; )

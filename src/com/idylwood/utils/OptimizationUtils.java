@@ -27,9 +27,6 @@
 
 package com.idylwood.utils;
 
-import java.util.List;
-import java.util.ArrayList;
-
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
@@ -72,18 +69,21 @@ public final class OptimizationUtils {
 		if (returns.length!=covariance.length)
 			throw new IllegalArgumentException("Returns must be same length as covariance");
 
+		/*
 		for (int i = 0; i < covariance.length; i++)
 			MathUtils.printArray(covariance[i]);
 		System.out.println();
 		MathUtils.printArray(returns);
+		System.out.println();
+		*/
 
 		final int timePoints = covariance.length;
 		final double[][] lagrangeMatrix = new double[timePoints+2][timePoints+2];
 		//b as in Ax = b
 		final double[] b = new double[timePoints+2];
-		for(int i=0; i < timePoints; i++)
+		for(int i = 0; i < timePoints; i++)
 		{
-			for(int j=0; j < timePoints;j++)
+			for(int j = 0; j < timePoints; j++)
 			{
 				lagrangeMatrix[i][j] = 2*covariance[i][j];
 				b[i] = 0;
@@ -92,7 +92,7 @@ public final class OptimizationUtils {
 			}
 		}
 
-		for(int j=0;j<timePoints; j++)
+		for(int j = 0; j<timePoints; j++)
 		{
 			lagrangeMatrix[timePoints][j] = returns[j];
 			lagrangeMatrix[timePoints+1][j] = 1;
@@ -102,6 +102,7 @@ public final class OptimizationUtils {
 		b[timePoints] = portfolio_return; //**** what is the constraint on total expected return?
 		b[timePoints + 1] = 1;
 
+		/*
 		// Print out lagrangeMatrix augmented with b vector
 		for(int i=0; i<timePoints+2; i++)
 		{
@@ -111,18 +112,19 @@ public final class OptimizationUtils {
 			}
 			System.out.println(b[i]);
 		}
+		*/
 		// TODO use Gaussian elimination solver, may be faster
 		// TODO maybe refactor to use idylblas
 		RealMatrix lagrangeReal = MatrixUtils.createRealMatrix(lagrangeMatrix);
 		RealVector bReal = MatrixUtils.createRealVector(b);
 		SingularValueDecomposition svd = new SingularValueDecomposition(lagrangeReal);
 
-		if (svd.getSolver().isNonSingular())
+		if (!svd.getSolver().isNonSingular())
 			return null;
 
 		RealVector solution = svd.getSolver().solve(bReal);
 
-		final double weights [] = new double[timePoints];
+		final double weights[] = new double[timePoints];
 
 		// last two elements of solution are just lagrange multipliers
 		for (int i = 0; i < weights.length; i++)
@@ -202,9 +204,6 @@ public final class OptimizationUtils {
 	}
 	*/
 
-	public static void main(String [] args)
-	{
-	}
 }
 
 

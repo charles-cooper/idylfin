@@ -43,21 +43,41 @@ public class HistTable
 	final public String symbol;
 	final public long dateAccessed;
 	// Note: this is not thread safe! assume there are no methods which modify this!
-	// TODO make this an immutable list. note that a lot of these methods could be optimized better if the data structures were immutable.
+	// TODO make this an immutable list. note that a lot of these methods could be optimized better
+	// if the data structures were immutable.
 	final public List<HistRow> data;
-	public boolean splitAdjusted; // TODO do something with these two things
-	public boolean dividendAdjusted;
+	public boolean splitAdjusted = false; // TODO declare these final.
+	public boolean dividendAdjusted = false;
 	public HistTable(String symbol, long dateAccessed,
 			List<HistRow> data)
 	{
 		this.symbol=symbol; this.dateAccessed = dateAccessed; this.data = data;
 	}
+	/**
+	 * Returns true iff it has been both split and dividend adjusted.
+	 * Side effects: none
+	 * @return
+	 */
+	final public boolean adjusted()
+	{
+		return splitAdjusted && dividendAdjusted;
+	}
 
-	// Returns a newly allocated HistTable. Not just a 'view'.
-	// If the start and end date are not within the table's start and end,
-	// it will return a newly allocated HistTable with not very much (nothing) in it
+	/**
+	 * Returns a newly allocated HistTable. Not just a 'view'.
+	 * If the start and end date are not within the table's start and end,
+	 * it will return a newly allocated HistTable with not very much (nothing) in it
+	 * Note that the returned table has ill defined values if the table has already
+	 * been adjusted for splits or dividends.
+	 * Side Effects: allocation of new HistTable
+	 * @param start
+	 * @param end
+	 * @return
+	 */
 	public HistTable SubTable(Date start, Date end)
 	{
+		if (this.dividendAdjusted||this.splitAdjusted)
+			throw new RuntimeException("Shouldn't try to get subtable of split or dividend adjusted table!");
 		final List<HistRow> list = new ArrayList<HistRow>(end.subtract(start));
 		HistTable ret = new HistTable(this.symbol,this.dateAccessed,list);
 		for (HistRow row : this.data)
@@ -66,16 +86,31 @@ public class HistTable
 		return ret;
 	}
 
+	/**
+	 * Returns the date of the first entry.
+	 * Side Effects: none
+	 * @return
+	 */
 	public Date StartDate()
 	{
 		return data.get(0).date;
 	}
 
+	/**
+	 * Returns the date of the last entry.
+	 * Side Effects: none
+	 * @return
+	 */
 	public Date EndDate()
 	{
 		return data.get(data.size()-1).date;
 	}
 
+	/**
+	 * Returns newly allocated list with the dates of the rows of the table.
+	 * @sideeffects Allocation of new List
+	 * @return
+	 */
 	public List<Date> Dates()
 	{
 		List<Date> ret = new ArrayList<Date>(data.size());
@@ -178,9 +213,14 @@ public class HistTable
 	// Pre: All the tables have the same starting and ending dates. otherwise
 	// the result will be undefined.
 	// This function calculates the result of reinvesting dividends
-	HistTable AdjustReinvestedDividends(DivTable dividends)
+	private HistTable AdjustReinvestedDividends(DivTable dividends)
 	{
+		if (this.dividendAdjusted)
+			throw new IllegalArgumentException("This is already dividend adjusted!");
 		HistTable ret = new HistTable(this.symbol,this.dateAccessed,new ArrayList<HistRow>(this.data.size()));
+		ret.dividendAdjusted = true;
+		ret.splitAdjusted = this.splitAdjusted;
+
 		List<YahooFinance.Single> ratios = new ArrayList<YahooFinance.Single>(dividends.data.size()+1);
 		ratios.add(new YahooFinance.Single(this.data.get(0).date,1));
 
@@ -224,9 +264,14 @@ public class HistTable
 
 	// This function calculates the effect of dividends. This is more correct
 	// than the adjusted close price given by Yahoo Finance
-	HistTable AdjustDividends(DivTable arg)
+	private HistTable AdjustDividends(DivTable arg)
 	{
+		if (this.dividendAdjusted)
+			throw new IllegalArgumentException("This is already dividend adjusted!");
 		HistTable ret = new HistTable(this.symbol, this.dateAccessed, new ArrayList<HistRow>(this.data.size()));
+		ret.dividendAdjusted = true;
+		ret.splitAdjusted = this.splitAdjusted;
+
 		List<YahooFinance.Single> dividends = new ArrayList<YahooFinance.Single>(arg.data.size()+1);
 		dividends.add(new YahooFinance.Single(this.data.get(0).date, 0)); // add a zero dividend
 		// calculate the running sum of the dividends
@@ -261,11 +306,19 @@ public class HistTable
 		return ret;
 	}
 
+	/**
+	 * Adjusts for splits according to arg. If already split adjusted will throw
+	 * an IllegalArgumentException
+	 * @param splits
+	 * @return newly allocated HistTable. No side effects.
+	 */
 	private HistTable AdjustSplits(SplitTable splits)
 	{
-		HistTable ret = new HistTable(this.symbol,
-				this.dateAccessed,
-				new ArrayList<HistRow>(this.data.size()));
+		if (this.splitAdjusted)
+			throw new IllegalArgumentException("This is already dividend adjusted!");
+		HistTable ret = new HistTable(this.symbol, this.dateAccessed, new ArrayList<HistRow>(this.data.size()));
+		ret.splitAdjusted = true;
+		ret.dividendAdjusted = this.dividendAdjusted;
 
 		List<Single> ratios = splits.RunningRatios(this.StartDate());
 
@@ -293,6 +346,13 @@ public class HistTable
 		return ret;
 	}
 
+	/**
+	 * Adjusts for reinvested dividends. Adjusts forward, not backwards
+	 * like most other adjusting algorithms.
+	 * Will throw IllegalArgumentException if has already been dividend adjusted
+	 * @return
+	 * @throws IOException
+	 */
 	public HistTable AdjustReinvestedDividends()
 		throws IOException
 	{
@@ -301,6 +361,13 @@ public class HistTable
 		return this.AdjustReinvestedDividends(dst.DivTable());
 	}
 
+	/**
+	 * Adjusts for dividends without reinvestment. Adjusts forward, not backwards
+	 * like most other adjusting algorithms.
+	 * Will throw IllegalArgumentException if has already been dividend adjusted
+	 * @return
+	 * @throws IOException
+	 */
 	public HistTable AdjustDividends()
 		throws IOException
 	{
@@ -309,6 +376,12 @@ public class HistTable
 		return this.AdjustDividends(dst.DivTable());
 	}
 
+	/**
+	 * Adjusts for splits by downloading the split table from yahoo finance.
+	 * If already split adjusted will throw an IllegalArgumentException
+	 * @param splits
+	 * @return
+	 */
 	public HistTable AdjustSplits()
 		throws IOException
 	{
@@ -317,12 +390,19 @@ public class HistTable
 		return this.AdjustSplits(dst.SplitTable());
 	}
 
-	// Adjust OHLC for dividends and splits
-	// Returns newly allocated table with no side effects.
+	/**
+	 * Adjust for dividends and splits. Returns newly allocated table with
+	 * no side effects besides possibly downloading and caching data from Yahoo Finance.
+	 * May throw an IllegalArgumentException if already adjusted for dividends or splits.
+	 * @return
+	 * @throws IOException
+	 */
 	public HistTable AdjustOHLC()
 		throws IOException
 	{
 		YahooFinance yf = YahooFinance.getInstance();
+		// order of adjust splits and dividends matters depending on whether
+		// dividends are split adjusted
 		// retarded way of checking if dividends are already split adjusted.
 		if (yf.HistoricalDividends(symbol, this.StartDate(), this.EndDate()).splitAdjusted)
 			return this.AdjustSplits().AdjustDividends();
@@ -330,6 +410,13 @@ public class HistTable
 		return this.AdjustDividends().AdjustSplits();
 	}
 
+	/**
+	 * Adjust for reinvested dividends and splits. Returns newly allocated table with
+	 * no side effects besides possibly downloading and caching data from Yahoo Finance.
+	 * May throw an IllegalArgumentException if already adjusted for dividends or splits.
+	 * @return
+	 * @throws IOException
+	 */
 	public HistTable AdjustOHLCWithReinvestment()
 		throws IOException
 	{

@@ -417,12 +417,12 @@ public final class YahooFinance
 	{
 		YahooFinance yf = new YahooFinance();
 		Date today = new Date(new java.util.Date());
-		Date start = new Date(20000101);
-		//yf.Alphabet("SPY","AAPL",100,.5);
-		String []symbols = new String[]{"BAC","JPM"};
-		List<HistTable> tables = new ArrayList<HistTable>();
+		Date start = new Date(20120101);
+		String []symbols = new String[]{"BAC","JPM","AAPL","SPY","MSFT"};
+		final HistTable[] tables = new HistTable[symbols.length];
+		int i = 0;
 		for (String symbol : symbols)
-			tables.add(yf.HistoricalPrices(symbol,start,today).AdjustOHLC());
+			tables[i++] = yf.HistoricalPrices(symbol,start,today).AdjustOHLCWithReinvestment();
 
 		double[] weights = FinUtils.MarkowitzPortfolio(tables, 0.001);
 		MathUtils.printArray(weights);

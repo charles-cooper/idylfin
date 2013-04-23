@@ -41,11 +41,17 @@ import com.idylwood.yahoo.YahooFinance.SplitTable;
 import com.idylwood.yahoo.YahooFinance.Single;
 
 public class FinUtils {
-	
-	// Takes two HistTables, and extracts the adjusted close prices
-	// Removes rows where the days don't match
-	// Similar to quantmod merge.
-	// No side effects.
+
+	/**
+	 * Takes two HistTables, and extracts the adjusted close prices.
+	 * Removes rows where the days don't match.
+	 * Similar to quantmod merge.
+	 * No side effects.
+	 * @param table1
+	 * @param table2
+	 * @return
+	 */
+	// TODO change this into some sort of 2D matrix.
 	public static List<Pair> merge(HistTable table1, HistTable table2)
 	{
 		final int len = Math.min(table1.data.size(), table2.data.size());
@@ -93,11 +99,18 @@ public class FinUtils {
 	{
 		return MathUtils.diff(MathUtils.log(data));
 	}
-	
+
+	/**
+	 * Calculates the Sharpe ratio of data with respect to benchmark
+	 * @throws IllegalArgumentException if either data or benchmark are not adjusted
+	 * @param data
+	 * @param benchmark
+	 * @return
+	 */
 	public static final double SharpeRatio(final HistTable data, final HistTable benchmark)
-		throws IOException
 	{
-		return SharpeRatio(data.AdjustOHLCWithReinvestment().CloseArray(), benchmark.AdjustOHLCWithReinvestment().CloseArray());
+		checkAdjusted(data,benchmark);
+		return SharpeRatio(data.CloseArray(), benchmark.CloseArray());
 	}
 
 	// assuming the riskFreeRate is constant and stuff
@@ -112,9 +125,9 @@ public class FinUtils {
 	}
 
 	public static final double SharpeRatio(final HistTable data, final double riskFreeRate)
-		throws IOException
 	{
-		return SharpeRatio(data.AdjustOHLCWithReinvestment().CloseArray(), riskFreeRate);
+		checkAdjusted(data);
+		return SharpeRatio(data.CloseArray(), riskFreeRate);
 	}
 
 	// the new sharpe ratio is literally identical to the information ratio
@@ -124,9 +137,9 @@ public class FinUtils {
 	}
 	
 	final public static double InformationRatio(final HistTable data, final HistTable benchmark)
-		throws IOException
 	{
-		return InformationRatio(data.AdjustOHLCWithReinvestment().CloseArray(),benchmark.AdjustOHLCWithReinvestment().CloseArray());
+		checkAdjusted(data,benchmark);
+		return InformationRatio(data.CloseArray(),benchmark.CloseArray());
 	}
 
 	// TODO
@@ -150,9 +163,9 @@ public class FinUtils {
 		return MathUtils.sum(FinUtils.totalLogReturn(data),-riskFreeRate,-regress.slope * FinUtils.totalLogReturn(benchmark), regress.slope*riskFreeRate);
 	}
 	final public static double JensensAlpha(final HistTable data, final HistTable benchmark, final double riskFreeRate)
-		throws IOException
 	{
-		return JensensAlpha(data.AdjustOHLCWithReinvestment().CloseArray(), benchmark.AdjustOHLCWithReinvestment().CloseArray(), riskFreeRate);
+		checkAdjusted(data,benchmark);
+		return JensensAlpha(data.CloseArray(), benchmark.CloseArray(), riskFreeRate);
 	}
 
 	// numerical precision not guaranteed
@@ -161,9 +174,9 @@ public class FinUtils {
 		return Math.log(FinUtils.totalReturn(data));
 	}
 	final public static double totalLogReturn(final HistTable data)
-		throws IOException
 	{
-		return totalLogReturn(data.AdjustOHLCWithReinvestment().CloseArray());
+		checkAdjusted(data);
+		return totalLogReturn(data.CloseArray());
 	}
 
 	final public static double totalReturn(final double data[])
@@ -171,9 +184,9 @@ public class FinUtils {
 		return data[data.length-1] / data[0];
 	}
 	public static final double totalReturn(final HistTable data)
-		throws IOException
 	{
-		return totalReturn(data.AdjustOHLCWithReinvestment().CloseArray());
+		checkAdjusted(data);
+		return totalReturn(data.CloseArray());
 	}
 
 	final public static double TreynorRatio(final double[] data, double [] benchmark)
@@ -184,9 +197,10 @@ public class FinUtils {
 		return MathUtils.mean(MathUtils.subtract(logReturns,benchmarkReturns)) / regress.slope;
 	}
 	public static final double TreynorRatio(final HistTable data, final HistTable benchmark)
-		throws IOException
 	{
-		return TreynorRatio(data.AdjustOHLCWithReinvestment().CloseArray(), benchmark.AdjustOHLCWithReinvestment().CloseArray());
+		if (!data.adjusted()||!benchmark.adjusted())
+			throw new IllegalArgumentException("Must be calculated on adjusted data");
+		return TreynorRatio(data.CloseArray(), benchmark.CloseArray());
 	}
 
 	final public static double CalmarRatio(final double[] data)
@@ -195,9 +209,9 @@ public class FinUtils {
 		return (averageDailyReturn * 250) / FinUtils.MaximumDrawdown(data);
 	}
 	public static final double CalmarRatio(final HistTable data)
-		throws IOException
 	{
-		return CalmarRatio(data.AdjustOHLCWithReinvestment().CloseArray());
+		checkAdjusted(data);
+		return CalmarRatio(data.CloseArray());
 	}
 
 	// returns max drawdown in log percent
@@ -218,18 +232,29 @@ public class FinUtils {
 		}
 		return maxDrawdown;
 	}
-	
-	public final static double MaximumDrawdown(final HistTable data)
-		throws IOException
+
+	/**
+	 * Throws IllegalArgumentException if any arguments are not adjusted
+	 * @param tables
+	 */
+	private final static void checkAdjusted(final HistTable... tables)
 	{
-		return MaximumDrawdown(data.AdjustOHLCWithReinvestment().CloseArray());
+		for (HistTable ht : tables)
+			if (!ht.adjusted())
+				throw new IllegalArgumentException("Must be calculated on adjusted data");
+	}
+
+	public final static double MaximumDrawdown(final HistTable data)
+	{
+		checkAdjusted(data);
+		return MaximumDrawdown(data.CloseArray());
 	}
 
 	// returns empirical VAR as log percentage
 	final public static double VAR(final double [] data, final double threshold)
 	{
 		if (0.0 > threshold || 1.0 < threshold)
-			throw new ArithmeticException("Bad threshold parameter: "+threshold);
+			throw new IllegalArgumentException("Bad threshold parameter: "+threshold);
 		final double [] logReturns = MathUtils.diff(MathUtils.log(data));
 		Arrays.sort(logReturns);
 		int idx = (int)(threshold * data.length);
@@ -237,9 +262,9 @@ public class FinUtils {
 	}
 	
 	final public static double VAR(final HistTable data, final double threshold)
-		throws IOException
 	{
-		return VAR(data.AdjustOHLCWithReinvestment().CloseArray(), threshold);
+		checkAdjusted(data);
+		return VAR(data.CloseArray(), threshold);
 	}
 
 	// returns empirical CVAR as log percentage
@@ -257,18 +282,25 @@ public class FinUtils {
 	final public static double CVAR(final HistTable data, double threshold)
 		throws IOException
 	{
-		return CVAR(data.AdjustOHLCWithReinvestment().CloseArray(),threshold);
+		checkAdjusted(data);
+		return CVAR(data.CloseArray(),threshold);
 	}
 
 	/**
 	 * Finds the Markowitz Portfolio for the given return
+	 * Right now it does not handle edge cases, e.g. the tables have
+	 * different start and end dates, so it is the responsibility of
+	 * the user to make sure the data is clean, otherwise you may get
+	 * weird bugs or undefined behavior. Obviously I am planning to
+	 * fix this down the line.
 	 * @param adjusted_tables
 	 * @param portfolio_return
 	 * @return
 	 */
-	public final static double[] MarkowitzPortfolio(final java.util.List<HistTable> adjusted_tables, final double portfolio_return)
+	public final static double[] MarkowitzPortfolio(final HistTable[] adjusted_tables, final double portfolio_return)
 	{
-		final double[][] data = new double[adjusted_tables.size()][];
+		checkAdjusted(adjusted_tables);
+		final double[][] data = new double[adjusted_tables.length][];
 		int i = 0;
 		for (HistTable ht : adjusted_tables)
 			data[i++] = MathUtils.diff(MathUtils.log(ht.CloseArray())); // yay hammering malloc
