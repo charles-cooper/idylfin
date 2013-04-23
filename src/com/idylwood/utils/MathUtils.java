@@ -549,7 +549,7 @@ public final class MathUtils {
 		return sum(values)==sumSlow(values);
 	}
 
-	public final static void printArray(double[] d)
+	public final static void printArray(final double[] d)
 	{
 		System.out.print("[");
 		for (int i = 0; i < d.length; ++i)
@@ -567,6 +567,27 @@ public final class MathUtils {
 		System.out.println("Exponent:"+Math.getExponent(diff));
 		System.out.println("Mantissa:"+mantissa(diff));
 		System.out.println("Precision:"+precision(diff));
+	}
+	/**
+	 * Equal to within epsilon
+	 * @param d1
+	 * @param d2
+	 * @param epsilon
+	 * @return
+	 */
+	static final boolean fuzzyEquals(final double d1, final double d2, final double epsilon)
+	{
+		return abs(d1-d2) < epsilon;
+	}
+	/**
+	 * Equal to one part in one million. Returns fuzzyEquals(d1,d2,10E-6)
+	 * @param d1
+	 * @param d2
+	 * @return
+	 */
+	public static final boolean fuzzyEquals(final double d1, final double d2)
+	{
+		return fuzzyEquals(d1,d2,10E-6);
 	}
 
 	// Returns the number of bits required to represent d
@@ -593,11 +614,19 @@ public final class MathUtils {
 		return ret.doubleValue();
 	}
 
-	// Numerically precise dot product. Keeps a running error along with the
-	// accumulator. Equivalent to MathUtils.sum(MathUtils.multiply(x,y))
-	// but much faster and with O(1) memory overhead.
-	// O(n) with O(1) space.
-	// Even faster than the naive implementation ;).
+	/**
+	 * Numerically precise dot product. Keeps a running error along with the
+	 * accumulator. Equivalent to MathUtils.sum(MathUtils.multiply(x,y))
+	 * but much faster and with O(1) memory overhead.
+	 * O(n) with O(1) space.
+	 * Even faster than the naive implementation ;).
+	 * @param x
+	 * @param y
+	 * @param startOne
+	 * @param startTwo
+	 * @param len
+	 * @return
+	 */
 	public static final double linearCombination(final double[]x, final double[]y, final int startOne, final int startTwo, final int len)
 	{
 		//if (true) return MathUtils.sum(MathUtils.multiply(x,y));

@@ -38,10 +38,12 @@ import de.erichseifert.gral.data.filters.Filter.Mode;
 
 import com.idylwood.*;
 import com.idylwood.utils.FinUtils;
+import com.idylwood.utils.MathUtils;
 
 // Class intended to provide wrapper to Yahoo Finance API
 public final class YahooFinance
 {
+	final static long TwentyFourHours = 1000L * 60 * 60 * 24; // millis in day
 	final static public Date DEFAULT_START_DATE = new Date(20070101);
 	final Map<String,HistTable> mTables = new HashMap<String,HistTable>();
 	final Map<String,DivTable> mDividends = new HashMap<String,DivTable>();
@@ -185,10 +187,9 @@ public final class YahooFinance
 		final DivSplitTable dst = this.HistoricalDivSplits(symbol, startDate, endDate);
 		return dst.SplitTable();
 	}
-
-	// TODO refactor to make this private
-	DivSplitTable HistoricalDivSplits(String symbol, Date startDate, Date endDate)
-		throws IOException
+	
+	DivSplitTable HistoricalDivSplits(String symbol)
+			throws IOException
 	{
 		DivSplitTable ret;
 		synchronized(mDivSplits)
@@ -200,17 +201,22 @@ public final class YahooFinance
 			// of our current table
 			if (null==ret || System.currentTimeMillis() - ret.dateAccessed > TwentyFourHours)
 			{
-				ret = HistoricalDivSplits(symbol);
+				ret = DownloadHistoricalDivSplits(symbol);
 				mDivSplits.put(symbol,ret);
 			}
 		}
-		ret = ret.SubTable(startDate,endDate);
 		return ret;
+	}
 
+	// TODO refactor to make this private
+	DivSplitTable HistoricalDivSplits(String symbol, Date startDate, Date endDate)
+		throws IOException
+	{
+		return HistoricalDivSplits(symbol).SubTable(startDate, endDate);
 	}
 
 	// Downloads historical split and dividend data and caches them. Called for side effects.
-	private DivSplitTable HistoricalDivSplits(String symbol)
+	private DivSplitTable DownloadHistoricalDivSplits(String symbol)
 		throws IOException
 	{
 		String csv = new HistoricalUrlBuilder(symbol)
@@ -285,6 +291,12 @@ public final class YahooFinance
 		return ret;
 	}
 
+	/**
+	 * Get the historical csv table for symbol. Will memoize (cache) the result.
+	 * @param symbol
+	 * @return
+	 * @throws IOException
+	 */
 	public HistTable HistoricalPrices(String symbol)
 		throws IOException
 	{
@@ -306,13 +318,24 @@ public final class YahooFinance
 		return ret;
 	}
 
-	final static long TwentyFourHours = 1000L * 60 * 60 * 24; // millis in day
-	// choose better variable names
 	public HistTable HistoricalPrices(String symbol, Date startDate, Date endDate)
 		throws IOException
 	{
 		final HistTable ret = HistoricalPrices(symbol);
 		return ret.SubTable(startDate,endDate);
+	}
+	/**
+	 * Overloaded version of HistoricalPrices(String, Date, Date)
+	 * @param symbol
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 * @throws IOException
+	 */
+	public HistTable HistoricalPrices(String symbol, int startDate, int endDate)
+			throws IOException
+	{
+		return HistoricalPrices(symbol, new Date(startDate), new Date(endDate));
 	}
 
 	private YahooFinance() {}
@@ -322,32 +345,6 @@ public final class YahooFinance
 	{
 		return sYahooFinance;
 	}
-
-	/*
-	// Assumes the second column is double.
-	static public DataTable normalize(DataTable data)
-	{
-		DataTable ret = new DataTable(data);
-		double mean = Statistics.mean(ret,1);
-		double max = Statistics.max(ret,1);
-		double max2 = Double.NEGATIVE_INFINITY;
-		double min = Statistics.min(ret,1);
-		double range = max - min;
-
-		for (int i = 0; i < ret.getRowCount(); i++)
-		{
-			double val = (Double) ret.get(1, i);
-			if (val > max2) max2 = val;
-			val -= mean;
-			val /= range;
-			ret.set(1, i, val);
-		}
-
-		if (max!=max2) throw new RuntimeException("Uh oh"); // sanity check
-
-		return ret;
-	}
-	*/
 
 	static long time = 0;
 	// helper function
@@ -360,9 +357,17 @@ public final class YahooFinance
 		time = newTime;
 	}
 
-	// This should really go in another class.
+	// TODO put this in FinUtils
+	/**
+	 * Calculates the rolling alpha and beta for two stocks
+	 * @param stock1
+	 * @param stock2
+	 * @param windowSize Size of window to calculate the regression over
+	 * @param convolutionFilter A smoothing parameter
+	 * @return A list of <code>Pair</code>s where the first member is the alpha
+	 * and the second member is the beta.
+	 */
 	public List<Pair> Alphabet(HistTable stock1, HistTable stock2, int windowSize, double convolutionFilter)
-		throws IOException
 	{
 		logTime("Start");
 		List<Pair> merged = FinUtils.merge(stock1,stock2);
@@ -418,11 +423,10 @@ public final class YahooFinance
 		List<HistTable> tables = new ArrayList<HistTable>();
 		for (String symbol : symbols)
 			tables.add(yf.HistoricalPrices(symbol,start,today).AdjustOHLC());
-		System.out.println(tables.get(0).data);
-		/*
-		double[] weights = FinUtils.MarkowitzPortfolio(tables);
+
+		double[] weights = FinUtils.MarkowitzPortfolio(tables, 0.001);
 		MathUtils.printArray(weights);
-		*/
+
 	}
 }
 

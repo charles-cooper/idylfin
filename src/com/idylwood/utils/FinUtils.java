@@ -260,24 +260,25 @@ public class FinUtils {
 		return CVAR(data.AdjustOHLCWithReinvestment().CloseArray(),threshold);
 	}
 
-	// Pre: all the tables have the same start and end date and have the same
-	// number of rows.
-	// TODO make this work
-	final static double[] MarkowitzPortfolio(final java.util.List<HistTable> tables)
-		throws IOException
+	/**
+	 * Finds the Markowitz Portfolio for the given return
+	 * @param adjusted_tables
+	 * @param portfolio_return
+	 * @return
+	 */
+	public final static double[] MarkowitzPortfolio(final java.util.List<HistTable> adjusted_tables, final double portfolio_return)
 	{
-		final double[][] data = new double[tables.size()][];
+		final double[][] data = new double[adjusted_tables.size()][];
 		int i = 0;
-		for (HistTable ht : tables)
-			data[i++] = MathUtils.diff(MathUtils.log(ht.AdjustOHLCWithReinvestment().CloseArray())); // yay hammering malloc
+		for (HistTable ht : adjusted_tables)
+			data[i++] = MathUtils.diff(MathUtils.log(ht.CloseArray())); // yay hammering malloc
 		final int row_len = data[0].length;
 
 		final double[][] covariance = MathUtils.covariance(data);
 		final double[] returns = new double[data.length]; //==tables.size()
 		for (i = 0; i < returns.length; ++i)
 			returns[i] = data[i][row_len-1]-data[i][0]; //i.e. totalLogReturn(tables.get(i));
-		final double riskTolerance = 0.15;
-		return OptimizationUtils.cvxSolve(covariance,returns,riskTolerance);
+		return OptimizationUtils.MarkowitzSolve(covariance,returns,portfolio_return);
 	}
 
 	public static void main(String[] args)
@@ -290,6 +291,7 @@ public class FinUtils {
 		for (int i = 0; i < 1000; i++)
 			cvar = CVAR(YahooFinance.getInstance().HistoricalPrices("AAPL",new Date(20070101),new Date(20130405)),1);
 		YahooFinance.logTime("calculated "+cvar);
+		YahooFinance.getInstance().HistoricalPrices("MSFT");
 	}
 }
 
