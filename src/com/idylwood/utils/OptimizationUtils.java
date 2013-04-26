@@ -19,7 +19,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Author: Charles Cooper
+ * Authors: Charles Cooper, Harry C Kim
  * Date: 2013
  * ====================================================
  */
@@ -59,7 +59,7 @@ public final class OptimizationUtils {
 	 * @param covariance Precalculated covariance matrix
 	 * @param returns Precalculated vector of returns
 	 * @param portfolio_return Return to optimize risk for
-	 * @author Harry Kim
+	 * @author Harry C Kim
 	 * @return
 	 */
 	static final double[] MarkowitzSolve(final double[][] covariance, final double[] returns, final double portfolio_return)
