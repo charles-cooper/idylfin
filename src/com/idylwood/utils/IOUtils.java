@@ -29,37 +29,54 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class IOUtils {
 
-	// Takes len as a 'hint' parameter when allocating the buffer
-	public final static String fromStream(InputStream is, int len)
+	/**
+	 * Reads the InputStream into a String and returns it.
+	 * @param is
+	 * @param len 'hint' parameter for allocating the internal buffer
+	 * @return
+	 * @throws IOException
+	 * Side Effects: Consumes the InputStream
+	 */
+	public final static String fromStream(final InputStream is, final int len)
 		throws IOException
 	{
-		ByteArrayOutputStream baos = new ByteArrayOutputStream(len);
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream(len);
 		Transfer(is,baos);
 		return baos.toString();
 	}
 
-	public final static String fromStream(InputStream is)
+	/**
+	 * Wrapper which calls fromStream(is,0)
+	 * @param is
+	 * @return
+	 * @throws IOException
+	 */
+	public final static String fromStream(final InputStream is)
 		throws IOException
 	{
 		return fromStream(is,0);
 	}
 
 	// Flushes the stream
-	public final static void Transfer(InputStream from, OutputStream to)
+	/**
+	 * Transfers the bytes, 1K at a time, from src to dest
+	 * @param src
+	 * @param dest
+	 * @throws IOException
+	 */
+	public final static void Transfer(final InputStream src, final OutputStream dest)
 		throws IOException
 	{
-		byte [] ba = new byte[1024];
+		final byte [] ba = new byte[1024];
 		int read = -1;
-		while ( -1 < (read = from.read(ba)) )
+		while ( -1 < (read = src.read(ba)) )
 		{
-			to.write(ba,0,read);
+			dest.write(ba,0,read);
 		}
-		to.flush();
+		dest.flush();
 	}
 }
 

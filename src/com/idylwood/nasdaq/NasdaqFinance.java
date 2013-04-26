@@ -13,10 +13,29 @@ public class NasdaqFinance {
 	{
 		final long time_accessed;
 		final List<CompanyListRow> data;
-		public CompanyList(final List<CompanyListRow> data, final long time_accessed)
+		private CompanyList(final List<CompanyListRow> data, final long time_accessed)
 		{
 			this.time_accessed = time_accessed;
-			this.data = data;
+			this.data = Collections.unmodifiableList(data);
+		}
+		public final enum Exchange
+		{
+			NYSE,NASDAQ,AMEX
+		}
+		static CompanyList get(Exchange ex)
+		{
+			URL url = new URL("http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange="+ex+"&render=download");
+			Reader reader = new InputStreamReader(url.openStream());
+			CSVReader csv = new CSVReader(reader);
+			List<String[]> allLines = csv.readAll();
+			List<CompanyListRow> data = new ArrayList<CompanyListRow>();
+			int i = 0;
+			for (String[] line : allLines)
+			{
+				if (0==i++) continue;
+				data.add(new CompanyListRow(line));
+			}
+			return new CompanyList(data,System.currentTimeMillis());
 		}
 	}
 	public static class CompanyListRow {
@@ -54,19 +73,7 @@ public class NasdaqFinance {
 	public static void main(String[] args)
 		throws MalformedURLException, IOException
 	{
-		URL url = new URL("http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nyse&render=download");
-		Reader reader = new InputStreamReader(url.openStream());
-		CSVReader csv = new CSVReader(reader);
-		List<String[]> allLines = csv.readAll();
-		List<CompanyListRow> data = new ArrayList<CompanyListRow>();
-		int i = 0;
-		for (String[] line : allLines)
-		{
-			if (0==i++) continue;
-			data.add(new CompanyListRow(line));
-		}
-		System.out.println(data.size());
-		
+		CompanyList.create(Exchange.AMEX);
 	}
 }
 
