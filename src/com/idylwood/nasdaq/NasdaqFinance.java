@@ -5,7 +5,11 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import com.idylwood.nasdaq.NasdaqFinance.CompanyList.Exchange;
+
 import au.com.bytecode.opencsv.CSVReader;
 
 public class NasdaqFinance {
@@ -18,11 +22,12 @@ public class NasdaqFinance {
 			this.time_accessed = time_accessed;
 			this.data = Collections.unmodifiableList(data);
 		}
-		public final enum Exchange
+		public enum Exchange
 		{
 			NYSE,NASDAQ,AMEX
 		}
 		static CompanyList get(Exchange ex)
+				throws IOException, MalformedURLException
 		{
 			URL url = new URL("http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange="+ex+"&render=download");
 			Reader reader = new InputStreamReader(url.openStream());
@@ -73,7 +78,7 @@ public class NasdaqFinance {
 	public static void main(String[] args)
 		throws MalformedURLException, IOException
 	{
-		CompanyList.create(Exchange.AMEX);
+		CompanyList.get(Exchange.AMEX);
 	}
 }
 
