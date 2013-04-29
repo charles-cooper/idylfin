@@ -28,10 +28,14 @@ package com.idylwood.yahoo;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class QuoteUrlBuilder extends UrlBuilder {
-	final Collection<String> symbols;
+	final Collection<String> mSymbols;
+	final Set<Tag> mTags = EnumSet.noneOf(Tag.class);
 	// not really sure what these 'realtime' things are
 	public enum Tag
 	{
@@ -118,15 +122,15 @@ public class QuoteUrlBuilder extends UrlBuilder {
 
 	public QuoteUrlBuilder()
 	{
-		symbols = new ArrayList<String>();
+		mSymbols = new ArrayList<String>();
 	}
 	public QuoteUrlBuilder(String symbol)
 	{
-		this(); symbols.add(symbol);
+		this(); mSymbols.add(symbol);
 	}
 	public QuoteUrlBuilder(Collection<String> symbols)
 	{
-		this.symbols = symbols;
+		this.mSymbols = symbols;
 	}
 	public QuoteUrlBuilder(List<String> symbols)
 	{
@@ -134,17 +138,52 @@ public class QuoteUrlBuilder extends UrlBuilder {
 	}
 	public QuoteUrlBuilder addSymbol(String s)
 	{
-		this.symbols.add(s);
+		mSymbols.add(s);
+		return this;
+	}
+	public QuoteUrlBuilder addSymbols(Collection<String> symbols)
+	{
+		mSymbols.addAll(symbols);
 		return this;
 	}
 	public QuoteUrlBuilder addTag(Tag t)
 	{
-		set("f",t.toString());
+		mTags.add(t);
 		return this;
 	}
+	public QuoteUrlBuilder addTags(Collection<Tag> tags)
+	{
+		mTags.addAll(tags);
+		return this;
+	}
+	private void setTags(final String tags)
+	{
+		set("f",tags);
+	}
+	private void setSymbols(final String symbols)
+	{
+		set("s",symbols);
+	}
+	// enumset iteration order is guaranteed, uses bitvector internally
 
 	@Override protected String baseUrl()
 	{
 		return "http://finance.yahoo.com/d/quotes.csv";
+	}
+	@Override protected UrlBuilder prepare()
+	{
+		String tags = "";
+		for (Tag t : mTags)
+			tags += t;
+		setTags(tags);
+		String symbols = "";
+		for (String s : mSymbols)
+		{
+			if (0!=s.length())
+				symbols += "+";
+			symbols += s;
+		}
+		setSymbols(symbols);
+		return this;
 	}
 }

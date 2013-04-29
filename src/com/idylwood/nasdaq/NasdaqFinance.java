@@ -92,6 +92,7 @@ public class NasdaqFinance {
 			Reader reader = new InputStreamReader(url.openStream());
 			CSVReader csv = new CSVReader(reader);
 			List<String[]> allLines = csv.readAll();
+			csv.close();
 			List<Company> data = new ArrayList<Company>();
 			int i = 0;
 			for (String[] line : allLines)

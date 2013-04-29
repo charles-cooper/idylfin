@@ -48,6 +48,9 @@ public final class HistoricalUrlBuilder extends UrlBuilder
 			return "http://ichart.yahoo.com/x";
 		return "http://ichart.yahoo.com/table.csv";
 	}
+	@Override public UrlBuilder prepare() {
+		return this;
+	}
 
 	public HistoricalUrlBuilder(String symbol) {
 		setSymbol(symbol);

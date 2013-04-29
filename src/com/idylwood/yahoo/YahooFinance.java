@@ -26,15 +26,18 @@
 
 package com.idylwood.yahoo;
 
-
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.math3.stat.regression.*;
 
 import de.erichseifert.gral.data.*;
 import de.erichseifert.gral.data.filters.*;
 import de.erichseifert.gral.data.filters.Filter.Mode;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 import com.idylwood.*;
 import com.idylwood.utils.FinUtils;
@@ -174,6 +177,7 @@ public final class YahooFinance
 		}
 	}
 
+
 	public DivTable HistoricalDividends(String symbol, Date startDate, Date endDate)
 		throws IOException
 	{
@@ -200,7 +204,8 @@ public final class YahooFinance
 			if (null==ret || System.currentTimeMillis() - ret.dateAccessed > TwentyFourHours)
 			{
 				ret = DownloadHistoricalDivSplits(symbol);
-				mDivSplits.put(symbol,ret);
+				// intern it in case calling code is smart
+				mDivSplits.put(symbol.intern(),ret);
 			}
 		}
 		return ret;
@@ -270,6 +275,38 @@ public final class YahooFinance
 		return ret;
 	}
 
+	// TODO make this work
+	List<Quote> DownloadQuotes(final String... symbols)
+			throws IOException
+	{
+		final QuoteUrlBuilder qub = new QuoteUrlBuilder();
+		qub.addTags(Quote.quoteTags);
+		qub.addSymbols(Arrays.asList(symbols));
+		System.out.println(qub.prepare());
+		final CSVReader csv = new CSVReader(new InputStreamReader(qub.prepare().toURL().openStream()));
+		final List<String[]> allLines = csv.readAll();
+		csv.close();
+		final List<Quote> ret = new ArrayList<Quote>(allLines.size());
+		for (final String line[] : allLines)
+		{
+			for (final String s : line)
+				System.out.print(s+" ");
+			System.out.println();
+		}
+		return ret;
+	}
+	// TODO make this work
+	private Map<String,Quote> mQuotes = new HashMap<String,Quote>();
+	private Collection<Quote> Quotes(final String... symbols)
+	{
+		final List<Quote> ret = new ArrayList<Quote>(symbols.length);
+		for (String symbol : symbols)
+		{
+		}
+		return ret;
+	}
+
+
 	// Downloads stuff from Yahoo Finance
 	public HistTable DownloadHistoricalPrices(String symbol)
 		throws IOException
@@ -310,7 +347,8 @@ public final class YahooFinance
 			if (null==ret || System.currentTimeMillis() - ret.dateAccessed > TwentyFourHours)
 			{
 				ret = DownloadHistoricalPrices(symbol);
-				mTables.put(symbol,ret);
+				// intern it in case calling code is smart
+				mTables.put(symbol.intern(),ret);
 			}
 		}
 		return ret;
@@ -413,7 +451,9 @@ public final class YahooFinance
 	public static void main(String args[])
 		throws IOException
 	{
-		YahooFinance yf = new YahooFinance();
+		YahooFinance yf = YahooFinance.getInstance();
+		yf.DownloadQuotes("BAC");
+		/*
 		Date today = new Date(new java.util.Date());
 		Date start = new Date(20120101);
 		String []symbols = new String[]{"BAC","JPM","AAPL","SPY","MSFT"};
@@ -424,6 +464,7 @@ public final class YahooFinance
 
 		double[] weights = FinUtils.MarkowitzPortfolio(tables, 0.001);
 		MathUtils.printArray(weights);
+		*/
 
 	}
 }

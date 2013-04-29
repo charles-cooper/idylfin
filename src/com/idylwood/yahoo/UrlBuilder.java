@@ -37,9 +37,11 @@ import com.idylwood.utils.IOUtils;
 public abstract class UrlBuilder {
 
 	protected abstract String baseUrl();
+	// maybe subclasses need to do some preparation
+	protected abstract UrlBuilder prepare();
 
 	// want guaranteed traversal order.
-	// TODO figure out some way of making this immutable.
+	// TODO figure out some way of making this immutable?
 	private final Map<String,String> map;
 
 	UrlBuilder()
@@ -55,6 +57,10 @@ public abstract class UrlBuilder {
 	public final UrlBuilder set(String K, String V) {
 		map.put(K, V);
 		return this;
+	}
+	protected final String get(String K)
+	{
+		return map.get(K);
 	}
 
 	// returns entry set with unguaranteed traversal order

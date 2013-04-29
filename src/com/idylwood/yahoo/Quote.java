@@ -26,27 +26,86 @@
 
 package com.idylwood.yahoo;
 
+import java.util.EnumSet;
+
 import com.idylwood.yahoo.Date;
+import com.idylwood.yahoo.QuoteUrlBuilder.Tag;
 
-public class Quote {
-	double bid;
-	double ask;
-	double dividend_yield;
-	double dividend_per_share;
-	Date dividend_pay_date;
-	Date dividend_ex_date;
-	double previous_close;
-	Date open_date;
-	double change;
-	Date last_trade_date;
-	Date trade_date;
-	double change_percent;
-	double change_after_hours;
-	double days_low;
-	double days_high;
-	double change_from_200_day_moving_average;
-	double change_percent_from_200_day_moving_average;
-	double change_from_50_day_moving_average;
-	double change_percent_from_50_day_moving_average;
+// convenience class for getting quote data
+// TODO make it work
+class Quote {
+	final long time_accessed;
+	final String ticker;
+	final String company_name;
+	final double bid;
+	final double ask;
+	final double dividend_yield;
+	final double dividend_per_share;
+	final Date dividend_pay_date;
+	final Date dividend_ex_date;
+	final double previous_close;
+	final Date open_date;
+	final double change;
+	final Date last_trade_date;
+	final Date trade_date;
+	final double change_after_hours;
+	final double days_low;
+	final double days_high;
+	final double change_from_200_day_moving_average;
+	final double change_from_50_day_moving_average;
+	static final EnumSet<Tag> quoteTags =
+			EnumSet.of(
+					Tag.BID,
+					Tag.ASK,
+					Tag.DIVIDEND_YIELD,
+					Tag.DIVIDEND_PER_SHARE,
+					Tag.DIVIDEND_PAY_DATE,
+					Tag.DIVIDEND_EX_DATE,
+					Tag.PREVIOUS_CLOSE,
+					Tag.OPEN_DATE,
+					Tag.CHANGE,
+					Tag.LAST_TRADE_DATE,
+					Tag.TRADE_DATE,
+					Tag.CHANGE_PERCENT,
+					Tag.CHANGE_AFTER_HOURS_REALTIME,
+					Tag.DAYS_LOW,
+					Tag.DAYS_HIGH,
+					Tag.CHANGE_FROM_MOVING_AVERAGE_200_DAY,
+					Tag.CHANGE_FROM_MOVING_AVERAGE_50_DAY
+					);
+	Quote(final String symbol, final String[] tokens)
+	{
+		// this is like the worst invention ever
+		time_accessed = System.currentTimeMillis();
+		ticker = symbol;
+		company_name = tokens[0];
+		bid = Double.parseDouble(tokens[indexOf(quoteTags,Tag.BID)]);
+		ask = Double.parseDouble(tokens[indexOf(quoteTags,Tag.ASK)]);
+		dividend_yield = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DIVIDEND_YIELD)]);
+		dividend_per_share = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DIVIDEND_PER_SHARE)]);
+		dividend_pay_date = new Date(tokens[indexOf(quoteTags,Tag.DIVIDEND_PAY_DATE)]);
+		dividend_ex_date = new Date(tokens[indexOf(quoteTags,Tag.DIVIDEND_EX_DATE)]);
+		previous_close = Double.parseDouble(tokens[indexOf(quoteTags,Tag.PREVIOUS_CLOSE)]);
+		open_date = new Date(tokens[indexOf(quoteTags,Tag.OPEN_DATE)]);
+		change = Double.parseDouble(tokens[indexOf(quoteTags,Tag.CHANGE)]);
+		last_trade_date = new Date(tokens[indexOf(quoteTags,Tag.LAST_TRADE_DATE)]);
+		change_after_hours = Double.parseDouble(tokens[indexOf(quoteTags,Tag.CHANGE_AFTER_HOURS_REALTIME)]);
+		days_low = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DAYS_LOW)]);
+		days_high = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DAYS_HIGH)]);
+		trade_date = new Date(tokens[indexOf(quoteTags,Tag.TRADE_DATE)]);
+		change_from_200_day_moving_average = Double.parseDouble(tokens[indexOf(quoteTags,Tag.CHANGE_FROM_MOVING_AVERAGE_200_DAY)]);
+		change_from_50_day_moving_average = Double.parseDouble(tokens[indexOf(quoteTags,Tag.CHANGE_FROM_MOVING_AVERAGE_50_DAY)]);
+	}
+	private static final int indexOf(EnumSet<Tag> set, Tag target)
+	{
+		int i = 1;
+		for (Tag t : set)
+		{
+			if (t.equals(target))
+				return i;
+			i++;
+		}
+		return -1;
+	}
+
 }
-
