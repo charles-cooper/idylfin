@@ -189,16 +189,14 @@ public final class YahooFinance
 	}
 	
 	DivSplitTable HistoricalDivSplits(String symbol)
-			throws IOException
+		throws IOException
 	{
 		DivSplitTable ret;
+		// TODO maybe this lock needs to be more sophisticated.
 		synchronized(mDivSplits)
 		{
 			ret = mDivSplits.get(symbol);
-			// TODO make this more sophisticated. As it is it's going to download the whole table another time every day. Lol.
-			//
-			// If we don't have the table or it is not in the bounds
-			// of our current table
+			// TODO make this more sophisticated. As it is it's going to download the whole table another time every day.
 			if (null==ret || System.currentTimeMillis() - ret.dateAccessed > TwentyFourHours)
 			{
 				ret = DownloadHistoricalDivSplits(symbol);
