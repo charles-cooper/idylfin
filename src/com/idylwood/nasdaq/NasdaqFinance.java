@@ -104,7 +104,7 @@ public class NasdaqFinance {
 		}
 	}
 	public static class Company {
-		final String symbol;
+		final String ticker;
 		final String name;
 		final double last_sale;
 		final double market_cap;
@@ -121,7 +121,7 @@ public class NasdaqFinance {
 			{
 				// intern the crap out of all strings
 				// it is going to make queries faster
-				symbol = tokens[0].intern();
+				ticker = tokens[0].intern();
 				name = tokens[1].intern();
 				last_sale = "n/a".equals(tokens[2]) ? 0 : Double.parseDouble(tokens[2]);
 				market_cap = "n/a".equals(tokens[3]) ? 0 : Double.parseDouble(tokens[3]);
