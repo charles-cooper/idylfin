@@ -2,6 +2,7 @@
 <project name="idylfin" default="build" basedir=".">
 	<path id="project.class.path">
 		<!--fileset dir="bin/lib/" includes="**"/-->
+		<!--fileset file="jsoup-1.7.2.jar"/-->
 	</path>
 
 	<target name="libs" description="Copy libs to bin/lib">
