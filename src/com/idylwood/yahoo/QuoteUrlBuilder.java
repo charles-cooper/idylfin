@@ -36,7 +36,7 @@ import java.util.Set;
 public class QuoteUrlBuilder extends UrlBuilder {
 	final Collection<String> mSymbols;
 	final Set<Tag> mTags = EnumSet.noneOf(Tag.class);
-	// not really sure what these 'realtime' things are
+	// Many of these tags are not well understood! Use at your own risk!
 	public enum Tag
 	{
 		ASK("a"),
@@ -48,10 +48,9 @@ public class QuoteUrlBuilder extends UrlBuilder {
 		DIVIDEND_PAY_DATE("r1"),
 		DIVIDEND_EX_DATE("q"),
 		PREVIOUS_CLOSE("p"),
-		OPEN_DATE("o"),
+		OPEN("o"),
 		CHANGE("c1"),
 		LAST_TRADE_DATE("d1"),
-		//CHANGE_PERCENT("c"),
 		TRADE_DATE("d2"),
 		CHANGE_REALTIME("c6"),
 		LAST_TRADE_TIME("t1"),
@@ -154,6 +153,7 @@ public class QuoteUrlBuilder extends UrlBuilder {
 	public QuoteUrlBuilder addTags(Collection<Tag> tags)
 	{
 		mTags.addAll(tags);
+		System.out.println(mTags);
 		return this;
 	}
 	private void setTags(final String tags)
@@ -179,7 +179,7 @@ public class QuoteUrlBuilder extends UrlBuilder {
 		String symbols = "";
 		for (String s : mSymbols)
 		{
-			if (0!=s.length())
+			if (0!=symbols.length())
 				symbols += "+";
 			symbols += s;
 		}

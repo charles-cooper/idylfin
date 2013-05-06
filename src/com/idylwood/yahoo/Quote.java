@@ -36,7 +36,7 @@ import com.idylwood.yahoo.QuoteUrlBuilder.Tag;
 class Quote {
 	final long time_accessed;
 	final String ticker;
-	final String company_name;
+	//final String company_name;
 	final double bid;
 	final double ask;
 	final double dividend_yield;
@@ -44,61 +44,74 @@ class Quote {
 	final Date dividend_pay_date;
 	final Date dividend_ex_date;
 	final double previous_close;
-	final Date open_date;
-	final double change;
+	final double open;
 	final Date last_trade_date;
-	final Date trade_date;
-	final double change_after_hours;
 	final double days_low;
 	final double days_high;
-	final double change_from_200_day_moving_average;
-	final double change_from_50_day_moving_average;
+	final double moving_average_200_day;
+	final double moving_average_50_day;
+	final double earnings_per_share;
 	static final EnumSet<Tag> quoteTags =
 			EnumSet.of(
-					Tag.BID,
-					Tag.ASK,
+					Tag.BID_REALTIME,
+					Tag.ASK_REALTIME,
 					Tag.DIVIDEND_YIELD,
 					Tag.DIVIDEND_PER_SHARE,
 					Tag.DIVIDEND_PAY_DATE,
 					Tag.DIVIDEND_EX_DATE,
 					Tag.PREVIOUS_CLOSE,
-					Tag.OPEN_DATE,
-					Tag.CHANGE,
+					Tag.OPEN,
 					Tag.LAST_TRADE_DATE,
-					Tag.TRADE_DATE,
-					Tag.CHANGE_PERCENT,
-					Tag.CHANGE_AFTER_HOURS_REALTIME,
 					Tag.DAYS_LOW,
 					Tag.DAYS_HIGH,
-					Tag.CHANGE_FROM_MOVING_AVERAGE_200_DAY,
-					Tag.CHANGE_FROM_MOVING_AVERAGE_50_DAY
-					);
+					Tag.MOVING_AVERAGE_200_DAY,
+					Tag.MOVING_AVERAGE_50_DAY,
+					Tag.EARNINGS_PER_SHARE
+				  );
 	Quote(final String symbol, final String[] tokens)
 	{
-		// this is like the worst invention ever
-		time_accessed = System.currentTimeMillis();
-		ticker = symbol;
-		company_name = tokens[0];
-		bid = Double.parseDouble(tokens[indexOf(quoteTags,Tag.BID)]);
-		ask = Double.parseDouble(tokens[indexOf(quoteTags,Tag.ASK)]);
-		dividend_yield = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DIVIDEND_YIELD)]);
-		dividend_per_share = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DIVIDEND_PER_SHARE)]);
-		dividend_pay_date = new Date(tokens[indexOf(quoteTags,Tag.DIVIDEND_PAY_DATE)]);
-		dividend_ex_date = new Date(tokens[indexOf(quoteTags,Tag.DIVIDEND_EX_DATE)]);
-		previous_close = Double.parseDouble(tokens[indexOf(quoteTags,Tag.PREVIOUS_CLOSE)]);
-		open_date = new Date(tokens[indexOf(quoteTags,Tag.OPEN_DATE)]);
-		change = Double.parseDouble(tokens[indexOf(quoteTags,Tag.CHANGE)]);
-		last_trade_date = new Date(tokens[indexOf(quoteTags,Tag.LAST_TRADE_DATE)]);
-		change_after_hours = Double.parseDouble(tokens[indexOf(quoteTags,Tag.CHANGE_AFTER_HOURS_REALTIME)]);
-		days_low = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DAYS_LOW)]);
-		days_high = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DAYS_HIGH)]);
-		trade_date = new Date(tokens[indexOf(quoteTags,Tag.TRADE_DATE)]);
-		change_from_200_day_moving_average = Double.parseDouble(tokens[indexOf(quoteTags,Tag.CHANGE_FROM_MOVING_AVERAGE_200_DAY)]);
-		change_from_50_day_moving_average = Double.parseDouble(tokens[indexOf(quoteTags,Tag.CHANGE_FROM_MOVING_AVERAGE_50_DAY)]);
+		try
+		{
+			// this is like the worst invention ever
+			time_accessed = System.currentTimeMillis();
+			ticker = symbol;
+			//company_name = tokens[0];
+			bid = Double.parseDouble(tokens[indexOf(quoteTags,Tag.BID_REALTIME)]);
+			ask = Double.parseDouble(tokens[indexOf(quoteTags,Tag.ASK_REALTIME)]);
+			dividend_yield = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DIVIDEND_YIELD)]);
+			dividend_per_share = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DIVIDEND_PER_SHARE)]);
+			previous_close = Double.parseDouble(tokens[indexOf(quoteTags,Tag.PREVIOUS_CLOSE)]);
+			open = Double.parseDouble(tokens[indexOf(quoteTags,Tag.OPEN)]);
+			days_low = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DAYS_LOW)]);
+			days_high = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DAYS_HIGH)]);
+			moving_average_200_day = Double.parseDouble(tokens[indexOf(quoteTags,Tag.MOVING_AVERAGE_200_DAY)]);
+			moving_average_50_day = Double.parseDouble(tokens[indexOf(quoteTags,Tag.MOVING_AVERAGE_50_DAY)]);
+			earnings_per_share = Double.parseDouble(tokens[indexOf(Tag.EARNINGS_PER_SHARE)]);
+
+			// dates are tricky so they get their own block
+			final java.util.Date todaysDate = new java.util.Date(time_accessed);
+			java.text.DateFormat df = new java.text.SimpleDateFormat("MMM dd"); // eg Jun 28
+			java.util.Date parsed = df.parse(tokens[indexOf(quoteTags,Tag.DIVIDEND_PAY_DATE)]);
+			parsed.setYear(todaysDate.getYear());
+			dividend_pay_date = new Date(parsed);
+			parsed = df.parse(tokens[indexOf(quoteTags,Tag.DIVIDEND_EX_DATE)]);
+			parsed.setYear(todaysDate.getYear());
+			dividend_ex_date = new Date(parsed);
+			df = new java.text.SimpleDateFormat("mm/dd/yyyy");
+			last_trade_date = new Date(df.parse(tokens[indexOf(quoteTags,Tag.LAST_TRADE_DATE)]));
+		}
+		catch (java.text.ParseException e)
+		{
+			throw new RuntimeException("You have bug!", e);
+		}
 	}
-	private static final int indexOf(EnumSet<Tag> set, Tag target)
+	private static final int indexOf(Tag target)
 	{
-		int i = 1;
+		return indexOf(quoteTags,target);
+	}
+	private static final int indexOf(final EnumSet<Tag> set, final Tag target)
+	{
+		int i = 0;
 		for (Tag t : set)
 		{
 			if (t.equals(target))

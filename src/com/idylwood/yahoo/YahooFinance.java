@@ -226,13 +226,10 @@ public final class YahooFinance
 			.setType(HistoricalUrlBuilder.Type.DIVIDEND)
 			.download();
 		String [] lines = csv.split("\n");
-		//System.out.println(csv);
 
 		final DivSplitTable ret = new DivSplitTable(lines.length);
 		ret.symbol = symbol;
 		ret.dateAccessed = System.currentTimeMillis();
-
-		//ret.data = new ArrayList<Pair>(lines.length);
 
 		for (String s : lines)
 		{
@@ -277,24 +274,31 @@ public final class YahooFinance
 
 	// TODO make this work
 	List<Quote> DownloadQuotes(final String... symbols)
-			throws IOException
+		throws IOException
 	{
 		final QuoteUrlBuilder qub = new QuoteUrlBuilder();
 		qub.addTags(Quote.quoteTags);
 		qub.addSymbols(Arrays.asList(symbols));
 		System.out.println(qub.prepare());
+		//System.out.println(Quote.quoteTags);
 		final CSVReader csv = new CSVReader(new InputStreamReader(qub.prepare().toURL().openStream()));
 		final List<String[]> allLines = csv.readAll();
 		csv.close();
 		final List<Quote> ret = new ArrayList<Quote>(allLines.size());
+		int i = 0;
 		for (final String line[] : allLines)
 		{
+			/*
 			for (final String s : line)
-				System.out.print(s+" ");
+				System.out.print(s+", ");
 			System.out.println();
+			*/
+			ret.add(new Quote(symbols[i], line));
+			++i;
 		}
 		return ret;
 	}
+
 	// TODO make this work
 	private Map<String,Quote> mQuotes = new HashMap<String,Quote>();
 	private Collection<Quote> Quotes(final String... symbols)
@@ -449,10 +453,20 @@ public final class YahooFinance
 	}
 
 	public static void main(String args[])
-		throws IOException
+		throws IOException, java.text.ParseException
 	{
 		YahooFinance yf = YahooFinance.getInstance();
-		yf.DownloadQuotes("BAC");
+		for (Quote q : yf.DownloadQuotes("BAC","MSFT","JPM"))
+		{
+			System.out.println(q.dividend_per_share+" "+q.earnings_per_share);
+		}
+		/*
+		java.text.DateFormat df = new java.text.SimpleDateFormat("MMM dd");
+		java.util.Date d = df.parse("Jun 28");
+		d.setYear(new java.util.Date().getYear());
+		System.out.println(d);
+		*/
+
 		/*
 		Date today = new Date(new java.util.Date());
 		Date start = new Date(20120101);
