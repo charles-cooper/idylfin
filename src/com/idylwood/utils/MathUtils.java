@@ -406,7 +406,7 @@ public final class MathUtils {
 
 	// returns newly allocated array with same length as input
 	// elements are max(input,0)
-	final public static double[] positivePart(final double[] data)
+	final public static double[] positivePart(final double... data)
 	{
 		final double [] ret = new double[data.length];
 		for (int i = data.length; i--!=0;)

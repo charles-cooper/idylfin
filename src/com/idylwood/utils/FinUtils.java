@@ -176,18 +176,17 @@ public class FinUtils {
 	}
 	final public static double totalLogReturn(final HistTable data)
 	{
-		checkAdjusted(data);
-		return totalLogReturn(data.CloseArray());
+		return Math.log(FinUtils.totalReturn(data));
 	}
 
 	final public static double totalReturn(final double data[])
 	{
 		return data[data.length-1] / data[0];
 	}
-	public static final double totalReturn(final HistTable data)
+	public static final double totalReturn(final HistTable table)
 	{
-		checkAdjusted(data);
-		return totalReturn(data.CloseArray());
+		checkAdjusted(table);
+		return table.data.get(table.data.size()-1).close / table.data.get(0).close;
 	}
 
 	final public static double TreynorRatio(final double[] data, double [] benchmark)
@@ -312,6 +311,23 @@ public class FinUtils {
 		for (i = 0; i < returns.length; ++i)
 			returns[i] = data[i][row_len-1]-data[i][0]; //i.e. totalLogReturn(tables.get(i));
 		return OptimizationUtils.MarkowitzSolve(covariance,returns,portfolio_return);
+	}
+	/**
+	 * Parameter free Markowitz Portfolio.
+	 * Basically calculates Markowitz portfolio for portfolio_return = mean return of constituents
+	 * @param adjusted_tables
+	 * @return
+	 */
+	public static final double[] MarkowitzPortfolio(final HistTable[] adjusted_tables)
+	{
+		checkAdjusted(adjusted_tables);
+		final double[] mean_returns = new double[adjusted_tables.length];
+		for (int i = 0; i < adjusted_tables.length; i++)
+		{
+			mean_returns[i] = FinUtils.totalLogReturn(adjusted_tables[i]) / adjusted_tables[i].data.size();
+		}
+		final double mean_return = Math.max(0, MathUtils.mean(mean_returns));
+		return MarkowitzPortfolio(adjusted_tables, mean_return);
 	}
 	public static final double[] weightByEarnings(List<Quote> quotes)
 	{

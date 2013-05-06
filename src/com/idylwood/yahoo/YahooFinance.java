@@ -456,16 +456,16 @@ public final class YahooFinance
 		throws IOException, java.text.ParseException
 	{
 		YahooFinance yf = YahooFinance.getInstance();
-		double[] weights_earnings = FinUtils.weightByEarnings(yf.DownloadQuotes("BAC","MSFT","JPM","AAPL","SPY"));
+		String []symbols = new String[]{"BAC","JPM","AAPL","INTC","MSFT"};
+		double[] weights_earnings = FinUtils.weightByEarnings(yf.DownloadQuotes(symbols));
 
 		Date today = new Date(new java.util.Date());
-		Date start = new Date(20120101);
-		String []symbols = new String[]{"BAC","JPM","AAPL","SPY","MSFT"};
+		Date start = new Date(20120501);
 		final HistTable[] tables = new HistTable[symbols.length];
 		int i = 0;
 		for (String symbol : symbols)
 			tables[i++] = yf.HistoricalPrices(symbol,start,today).AdjustOHLCWithReinvestment();
-		double[] weights_markowitz = FinUtils.MarkowitzPortfolio(tables, 0.001);
+		double[] weights_markowitz = FinUtils.MarkowitzPortfolio(tables);
 
 		System.out.println("Markowitz");
 		MathUtils.printArray(weights_markowitz);
