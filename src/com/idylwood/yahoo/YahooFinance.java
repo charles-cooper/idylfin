@@ -455,23 +455,34 @@ public final class YahooFinance
 	public static void main(String args[])
 		throws IOException, java.text.ParseException
 	{
-		YahooFinance yf = YahooFinance.getInstance();
-		String []symbols = new String[]{"BAC","JPM","AAPL","INTC","MSFT"};
-		double[] weights_earnings = FinUtils.weightByEarnings(yf.DownloadQuotes(symbols));
+		final YahooFinance yf = YahooFinance.getInstance();
+		final String []symbols = new String[]{"BAC","JPM","AAPL","INTC","MSFT"};
+		final List<Quote> quotes = yf.DownloadQuotes(symbols);
+		final double[] weights_earnings = FinUtils.weightByEarnings(quotes);
+		final double[] weights_market_cap = FinUtils.weightByMarketCap(quotes);
 
-		Date today = new Date(new java.util.Date());
-		Date start = new Date(20120501);
+		/*
+		final Date today = new Date(new java.util.Date());
+		final Date start = new Date(20120501);
 		final HistTable[] tables = new HistTable[symbols.length];
 		int i = 0;
-		for (String symbol : symbols)
+		for (final String symbol : symbols)
 			tables[i++] = yf.HistoricalPrices(symbol,start,today).AdjustOHLCWithReinvestment();
-		double[] weights_markowitz = FinUtils.MarkowitzPortfolio(tables);
+		final double[] weights_markowitz = FinUtils.MarkowitzPortfolio(tables);
+		*/
 
-		System.out.println("Markowitz");
-		MathUtils.printArray(weights_markowitz);
+		System.out.println(Arrays.toString(symbols));
+		//System.out.println("Markowitz");
+		//System.out.println(Arrays.toString(weights_markowitz));
 		System.out.println("Earnings");
-		MathUtils.printArray(weights_earnings);
-
+		//MathUtils.printArray(weights_earnings);
+		System.out.println(Arrays.toString(weights_earnings));
+		System.out.println("Market Cap");
+		MathUtils.printArray(weights_market_cap);
+		System.out.println("Div Yields");
+		MathUtils.printArray(FinUtils.weightByDividendYield(quotes));
+		System.out.println("Div per share");
+		MathUtils.printArray(FinUtils.weightByDividends(quotes));
 	}
 }
 

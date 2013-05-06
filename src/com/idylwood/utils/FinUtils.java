@@ -333,18 +333,34 @@ public class FinUtils {
 	{
 		final double[] earnings = new double[quotes.size()];
 		int i = 0;
-		for (Quote q : quotes)
-		{
-			final double shares_outstanding = q.market_cap / q.last_price;
-			earnings[i++] = q.earnings_per_share * shares_outstanding;
-		}
-
-		final double sum_earnings = MathUtils.sum(earnings);
-		final double[] ret = new double[quotes.size()]; // weights
-		for (i = 0; i < quotes.size(); i++)
-			ret[i] = earnings[i] / sum_earnings;
-
-		return ret;
+		for (final Quote q : quotes)
+			earnings[i++] = q.earnings_per_share * q.market_cap / q.last_price;
+		return MathUtils.normalize(earnings);
+	}
+	public static final double[] weightByDividends(List<Quote> quotes)
+	{
+		final double[] divs = new double[quotes.size()];
+		int i = 0;
+		for (final Quote q : quotes)
+			divs[i++] = q.dividend_per_share * q.market_cap / q.last_price;
+		return MathUtils.normalize(divs);
+	}
+	public static final double[] weightByMarketCap(List<Quote> quotes)
+	{
+		// this would be so much simpler with closures and better collections!
+		final double[] market_caps = new double[quotes.size()];
+		int i = 0;
+		for (final Quote q : quotes)
+			market_caps[i++] = q.market_cap;
+		return MathUtils.normalize(market_caps);
+	}
+	public static final double[] weightByDividendYield(List<Quote> quotes)
+	{
+		final double[] div_yields = new double[quotes.size()];
+		int i = 0;
+		for (final Quote q : quotes)
+			div_yields[i++] = q.dividend_yield;
+		return MathUtils.normalize(div_yields);
 	}
 
 	public static void main(String[] args)

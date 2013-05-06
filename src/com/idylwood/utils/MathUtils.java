@@ -94,6 +94,19 @@ public final class MathUtils {
 		return round(d*100.0) / 100.0;
 	}
 
+	/**
+	 * Normalizes with respect to 1-norm (sum)
+	 * @return
+	 */
+	public static final double[] normalize(final double... d)
+	{
+		final double sum = MathUtils.sum(d);
+		final double []ret = new double[d.length];
+		for (int i = 0; i < d.length; i++)
+			ret[i] = d[i] / sum;
+		return ret;
+	}
+
 	// numerically stable calculation of mean
 	public final static double mean(final double [] values)
 	{
@@ -552,13 +565,7 @@ public final class MathUtils {
 
 	public final static void printArray(final double[] d)
 	{
-		System.out.print("[");
-		for (int i = 0; i < d.length; ++i)
-		{
-			if (0!=i) System.out.print(",");
-			System.out.print(d[i]);
-		}
-		System.out.println("]");
+		System.out.println(Arrays.toString(d));
 	}
 
 	static final void compare(final String msg, final double d1, final double d2)
