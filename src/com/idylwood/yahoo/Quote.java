@@ -34,23 +34,36 @@ import com.idylwood.yahoo.QuoteUrlBuilder.Tag;
 // convenience class for getting quote data
 // TODO make it work
 class Quote {
-	final long time_accessed;
-	final String ticker;
-	//final String company_name;
-	final double bid;
-	final double ask;
-	final double dividend_yield;
-	final double dividend_per_share;
-	final Date dividend_pay_date;
-	final Date dividend_ex_date;
-	final double previous_close;
-	final double open;
-	final Date last_trade_date;
-	final double days_low;
-	final double days_high;
-	final double moving_average_200_day;
-	final double moving_average_50_day;
-	final double earnings_per_share;
+	public final long time_accessed;
+	public final String ticker;
+	// public final String company_name;
+	public final double bid;
+	public final double ask;
+	public final double dividend_yield;
+	public final double dividend_per_share;
+	public final Date dividend_pay_date;
+	public final Date dividend_ex_date;
+	public final double previous_close;
+	public final double open;
+	public final Date last_trade_date;
+	public final double days_low;
+	public final double days_high;
+	public final double moving_average_200_day;
+	public final double moving_average_50_day;
+	public final double earnings_per_share;
+	public final double eps_estimate_current_year;
+	public final double eps_estimate_next_year;
+	public final double eps_estimate_next_quarter;
+	public final double book_value;
+	public final double ebitda; // ebitda is tricky.
+	public final double price_sales_ratio;
+	public final double price_book_ratio;
+	public final double price_earnings_ratio; // P/E ratio
+	public final double short_ratio;
+	public final double revenue;
+	public final double shares_outstanding;
+	public final long volume;
+	public final long average_daily_volume;
 	static final EnumSet<Tag> quoteTags =
 			EnumSet.of(
 					Tag.BID_REALTIME,
@@ -66,7 +79,20 @@ class Quote {
 					Tag.DAYS_HIGH,
 					Tag.MOVING_AVERAGE_200_DAY,
 					Tag.MOVING_AVERAGE_50_DAY,
-					Tag.EARNINGS_PER_SHARE
+					Tag.EARNINGS_PER_SHARE,
+					Tag.EARNINGS_PER_SHARE_ESTIMATE_CURRENT_YEAR,
+					Tag.EARNINGS_PER_SHARE_ESTIMATE_NEXT_YEAR,
+					Tag.EARNINGS_PER_SHARE_ESTIMATE_NEXT_QUARTER,
+					Tag.BOOK_VALUE,
+					Tag.PRICE_SALES_RATIO,
+					Tag.PRICE_BOOK_RATIO,
+					Tag.PRICE_EARNINGS_RATIO,
+					Tag.SHORT_RATIO,
+					Tag.VOLUME,
+					Tag.VOLUME_DAILY_AVERAGE,
+					Tag.REVENUE,
+					Tag.SHARES_OUTSTANDING,
+					Tag.EBITDA
 				  );
 	Quote(final String symbol, final String[] tokens)
 	{
@@ -76,17 +102,30 @@ class Quote {
 			time_accessed = System.currentTimeMillis();
 			ticker = symbol;
 			//company_name = tokens[0];
-			bid = Double.parseDouble(tokens[indexOf(quoteTags,Tag.BID_REALTIME)]);
-			ask = Double.parseDouble(tokens[indexOf(quoteTags,Tag.ASK_REALTIME)]);
-			dividend_yield = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DIVIDEND_YIELD)]);
-			dividend_per_share = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DIVIDEND_PER_SHARE)]);
-			previous_close = Double.parseDouble(tokens[indexOf(quoteTags,Tag.PREVIOUS_CLOSE)]);
-			open = Double.parseDouble(tokens[indexOf(quoteTags,Tag.OPEN)]);
-			days_low = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DAYS_LOW)]);
-			days_high = Double.parseDouble(tokens[indexOf(quoteTags,Tag.DAYS_HIGH)]);
-			moving_average_200_day = Double.parseDouble(tokens[indexOf(quoteTags,Tag.MOVING_AVERAGE_200_DAY)]);
-			moving_average_50_day = Double.parseDouble(tokens[indexOf(quoteTags,Tag.MOVING_AVERAGE_50_DAY)]);
-			earnings_per_share = Double.parseDouble(tokens[indexOf(Tag.EARNINGS_PER_SHARE)]);
+			bid = Double.parseDouble(tokens[idx(Tag.BID_REALTIME)]);
+			ask = Double.parseDouble(tokens[idx(Tag.ASK_REALTIME)]);
+			dividend_yield = Double.parseDouble(tokens[idx(Tag.DIVIDEND_YIELD)]);
+			dividend_per_share = Double.parseDouble(tokens[idx(Tag.DIVIDEND_PER_SHARE)]);
+			previous_close = Double.parseDouble(tokens[idx(Tag.PREVIOUS_CLOSE)]);
+			open = Double.parseDouble(tokens[idx(Tag.OPEN)]);
+			days_low = Double.parseDouble(tokens[idx(Tag.DAYS_LOW)]);
+			days_high = Double.parseDouble(tokens[idx(Tag.DAYS_HIGH)]);
+			moving_average_200_day = Double.parseDouble(tokens[idx(Tag.MOVING_AVERAGE_200_DAY)]);
+			moving_average_50_day = Double.parseDouble(tokens[idx(Tag.MOVING_AVERAGE_50_DAY)]);
+			earnings_per_share = Double.parseDouble(tokens[idx(Tag.EARNINGS_PER_SHARE)]);
+			eps_estimate_current_year = Double.parseDouble(tokens[idx(Tag.EARNINGS_PER_SHARE_ESTIMATE_CURRENT_YEAR)]);
+			eps_estimate_next_year = Double.parseDouble(tokens[idx(Tag.EARNINGS_PER_SHARE_ESTIMATE_NEXT_YEAR)]);
+			eps_estimate_next_quarter = Double.parseDouble(tokens[idx(Tag.EARNINGS_PER_SHARE_ESTIMATE_NEXT_QUARTER)]);
+			book_value = Double.parseDouble(tokens[idx(Tag.BOOK_VALUE)]);
+			price_sales_ratio = Double.parseDouble(tokens[idx(Tag.PRICE_SALES_RATIO)]);
+			price_book_ratio = Double.parseDouble(tokens[idx(Tag.PRICE_BOOK_RATIO)]);
+			price_earnings_ratio = Double.parseDouble(tokens[idx(Tag.PRICE_EARNINGS_RATIO)]);
+			short_ratio = Double.parseDouble(tokens[idx(Tag.SHORT_RATIO)]);
+			revenue = Double.parseDouble(scientificNotation(tokens[idx(Tag.REVENUE)])); // 10.10B
+			ebitda = Double.parseDouble(scientificNotation(tokens[idx(Tag.EBITDA)]));
+			shares_outstanding = Long.parseLong(tokens[idx(Tag.SHARES_OUTSTANDING)].replaceAll(",| ","")); // 10,000,000
+			volume = Long.parseLong(tokens[idx(Tag.VOLUME)]);
+			average_daily_volume = Long.parseLong(tokens[idx(Tag.VOLUME_DAILY_AVERAGE)]);
 
 			// dates are tricky so they get their own block
 			final java.util.Date todaysDate = new java.util.Date(time_accessed);
@@ -105,7 +144,28 @@ class Quote {
 			throw new RuntimeException("You have bug!", e);
 		}
 	}
-	private static final int indexOf(Tag target)
+
+	// returns 10^9 for 'B', 10^6 for 'M', 10^3 for 'K' and 0 otherwise
+	private static final long charToLong(final char c)
+	{
+		switch (c)
+		{
+		case 'B' : return 1000 * 1000 * 1000;
+		//case 'b' : return 1000 * 1000 * 1000;
+		case 'M' : return 1000 * 1000;
+		//case 'm' : return 1000 * 1000;
+		case 'K' : return 1000;
+		//case 'k' : return 1000;
+		default : return 0;
+		}
+	}
+	// replace 'B'/'M'/'K' suffix with E9/E6 etc.
+	private static String scientificNotation(final String s)
+	{
+		return s.replace("B","E9").replace("M","E6").replace("K","E3");
+	}
+	// to save typing
+	private static final int idx(final Tag target)
 	{
 		return indexOf(quoteTags,target);
 	}

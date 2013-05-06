@@ -458,7 +458,7 @@ public final class YahooFinance
 		YahooFinance yf = YahooFinance.getInstance();
 		for (Quote q : yf.DownloadQuotes("BAC","MSFT","JPM"))
 		{
-			System.out.println(q.dividend_per_share+" "+q.earnings_per_share);
+			System.out.println(q.dividend_per_share+" "+q.earnings_per_share+" "+q.revenue);
 		}
 		/*
 		java.text.DateFormat df = new java.text.SimpleDateFormat("MMM dd");
