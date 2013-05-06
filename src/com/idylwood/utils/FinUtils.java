@@ -34,6 +34,7 @@ import com.idylwood.utils.MathUtils.LinearRegression;
 import com.idylwood.yahoo.Date;
 import com.idylwood.yahoo.HistRow;
 import com.idylwood.yahoo.HistTable;
+import com.idylwood.yahoo.Quote;
 import com.idylwood.yahoo.YahooFinance;
 import com.idylwood.yahoo.YahooFinance.DivTable;
 import com.idylwood.yahoo.YahooFinance.Pair;
@@ -311,6 +312,23 @@ public class FinUtils {
 		for (i = 0; i < returns.length; ++i)
 			returns[i] = data[i][row_len-1]-data[i][0]; //i.e. totalLogReturn(tables.get(i));
 		return OptimizationUtils.MarkowitzSolve(covariance,returns,portfolio_return);
+	}
+	public static final double[] weightByEarnings(List<Quote> quotes)
+	{
+		final double[] earnings = new double[quotes.size()];
+		int i = 0;
+		for (Quote q : quotes)
+		{
+			final double shares_outstanding = q.market_cap / q.last_price;
+			earnings[i++] = q.earnings_per_share * shares_outstanding;
+		}
+
+		final double sum_earnings = MathUtils.sum(earnings);
+		final double[] ret = new double[quotes.size()]; // weights
+		for (i = 0; i < quotes.size(); i++)
+			ret[i] = earnings[i] / sum_earnings;
+
+		return ret;
 	}
 
 	public static void main(String[] args)

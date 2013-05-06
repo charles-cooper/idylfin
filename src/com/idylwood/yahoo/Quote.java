@@ -33,12 +33,13 @@ import com.idylwood.yahoo.QuoteUrlBuilder.Tag;
 
 // convenience class for getting quote data
 // TODO make it work
-class Quote {
+public class Quote {
 	public final long time_accessed;
 	public final String ticker;
 	// public final String company_name;
 	public final double bid;
 	public final double ask;
+	public final double last_price;
 	public final double dividend_yield;
 	public final double dividend_per_share;
 	public final Date dividend_pay_date;
@@ -61,7 +62,10 @@ class Quote {
 	public final double price_earnings_ratio; // P/E ratio
 	public final double short_ratio;
 	public final double revenue;
-	public final double shares_outstanding;
+	// don't use this since it doesn't make sense. use market cap instead
+	//public final double shares_outstanding;
+	public final double market_cap;
+	
 	public final long volume;
 	public final long average_daily_volume;
 	static final EnumSet<Tag> quoteTags =
@@ -91,8 +95,9 @@ class Quote {
 					Tag.VOLUME,
 					Tag.VOLUME_DAILY_AVERAGE,
 					Tag.REVENUE,
-					Tag.SHARES_OUTSTANDING,
-					Tag.EBITDA
+					Tag.MARKET_CAPITALIZATION,
+					Tag.EBITDA,
+					Tag.LAST_TRADE_PRICE_ONLY
 				  );
 	Quote(final String symbol, final String[] tokens)
 	{
@@ -104,6 +109,7 @@ class Quote {
 			//company_name = tokens[0];
 			bid = Double.parseDouble(tokens[idx(Tag.BID_REALTIME)]);
 			ask = Double.parseDouble(tokens[idx(Tag.ASK_REALTIME)]);
+			last_price = Double.parseDouble(tokens[idx(Tag.LAST_TRADE_PRICE_ONLY)]);
 			dividend_yield = Double.parseDouble(tokens[idx(Tag.DIVIDEND_YIELD)]);
 			dividend_per_share = Double.parseDouble(tokens[idx(Tag.DIVIDEND_PER_SHARE)]);
 			previous_close = Double.parseDouble(tokens[idx(Tag.PREVIOUS_CLOSE)]);
@@ -117,13 +123,13 @@ class Quote {
 			eps_estimate_next_year = Double.parseDouble(tokens[idx(Tag.EARNINGS_PER_SHARE_ESTIMATE_NEXT_YEAR)]);
 			eps_estimate_next_quarter = Double.parseDouble(tokens[idx(Tag.EARNINGS_PER_SHARE_ESTIMATE_NEXT_QUARTER)]);
 			book_value = Double.parseDouble(tokens[idx(Tag.BOOK_VALUE)]);
-			price_sales_ratio = Double.parseDouble(tokens[idx(Tag.PRICE_SALES_RATIO)]);
-			price_book_ratio = Double.parseDouble(tokens[idx(Tag.PRICE_BOOK_RATIO)]);
-			price_earnings_ratio = Double.parseDouble(tokens[idx(Tag.PRICE_EARNINGS_RATIO)]);
-			short_ratio = Double.parseDouble(tokens[idx(Tag.SHORT_RATIO)]);
+			price_sales_ratio = parseDoubleCheckNA(tokens[idx(Tag.PRICE_SALES_RATIO)]);
+			price_book_ratio = parseDoubleCheckNA(tokens[idx(Tag.PRICE_BOOK_RATIO)]);
+			price_earnings_ratio = parseDoubleCheckNA(tokens[idx(Tag.PRICE_EARNINGS_RATIO)]);
+			short_ratio = parseDoubleCheckNA(tokens[idx(Tag.SHORT_RATIO)]);
+			market_cap = parseDoubleCheckNA(scientificNotation(tokens[idx(Tag.MARKET_CAPITALIZATION)]));
 			revenue = Double.parseDouble(scientificNotation(tokens[idx(Tag.REVENUE)])); // 10.10B
 			ebitda = Double.parseDouble(scientificNotation(tokens[idx(Tag.EBITDA)]));
-			shares_outstanding = Long.parseLong(tokens[idx(Tag.SHARES_OUTSTANDING)].replaceAll(",| ","")); // 10,000,000
 			volume = Long.parseLong(tokens[idx(Tag.VOLUME)]);
 			average_daily_volume = Long.parseLong(tokens[idx(Tag.VOLUME_DAILY_AVERAGE)]);
 
@@ -145,22 +151,15 @@ class Quote {
 		}
 	}
 
-	// returns 10^9 for 'B', 10^6 for 'M', 10^3 for 'K' and 0 otherwise
-	private static final long charToLong(final char c)
+	private static final double parseDoubleCheckNA(final String s)
 	{
-		switch (c)
-		{
-		case 'B' : return 1000 * 1000 * 1000;
-		//case 'b' : return 1000 * 1000 * 1000;
-		case 'M' : return 1000 * 1000;
-		//case 'm' : return 1000 * 1000;
-		case 'K' : return 1000;
-		//case 'k' : return 1000;
-		default : return 0;
-		}
+		if ("N/A".equals(s))
+			//return Double.NaN;
+			return 0;
+		return Double.parseDouble(s);
 	}
 	// replace 'B'/'M'/'K' suffix with E9/E6 etc.
-	private static String scientificNotation(final String s)
+	private static final String scientificNotation(final String s)
 	{
 		return s.replace("B","E9").replace("M","E6").replace("K","E3");
 	}

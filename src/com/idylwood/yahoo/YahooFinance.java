@@ -456,18 +456,8 @@ public final class YahooFinance
 		throws IOException, java.text.ParseException
 	{
 		YahooFinance yf = YahooFinance.getInstance();
-		for (Quote q : yf.DownloadQuotes("BAC","MSFT","JPM"))
-		{
-			System.out.println(q.dividend_per_share+" "+q.earnings_per_share+" "+q.revenue);
-		}
-		/*
-		java.text.DateFormat df = new java.text.SimpleDateFormat("MMM dd");
-		java.util.Date d = df.parse("Jun 28");
-		d.setYear(new java.util.Date().getYear());
-		System.out.println(d);
-		*/
+		double[] weights_earnings = FinUtils.weightByEarnings(yf.DownloadQuotes("BAC","MSFT","JPM","AAPL","SPY"));
 
-		/*
 		Date today = new Date(new java.util.Date());
 		Date start = new Date(20120101);
 		String []symbols = new String[]{"BAC","JPM","AAPL","SPY","MSFT"};
@@ -475,10 +465,12 @@ public final class YahooFinance
 		int i = 0;
 		for (String symbol : symbols)
 			tables[i++] = yf.HistoricalPrices(symbol,start,today).AdjustOHLCWithReinvestment();
+		double[] weights_markowitz = FinUtils.MarkowitzPortfolio(tables, 0.001);
 
-		double[] weights = FinUtils.MarkowitzPortfolio(tables, 0.001);
-		MathUtils.printArray(weights);
-		*/
+		System.out.println("Markowitz");
+		MathUtils.printArray(weights_markowitz);
+		System.out.println("Earnings");
+		MathUtils.printArray(weights_earnings);
 
 	}
 }

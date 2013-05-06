@@ -2,4 +2,6 @@ Write unit tests!!
 Minimize dependencies
 Options data / pricing
 Implement merge
+quote caching
+need some sort of portfolio object
 
