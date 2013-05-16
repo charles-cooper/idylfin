@@ -58,9 +58,7 @@ public class NasdaqFinance {
 	{
 		final Set<String> ret = new HashSet<String>();
 		for (final Company company : companies.data)
-		{
 			ret.add(company.sector);
-		}
 		return ret;
 	}
 	public final Set<String> sectors()

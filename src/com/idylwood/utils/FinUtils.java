@@ -36,10 +36,7 @@ import com.idylwood.yahoo.HistRow;
 import com.idylwood.yahoo.HistTable;
 import com.idylwood.yahoo.Quote;
 import com.idylwood.yahoo.YahooFinance;
-import com.idylwood.yahoo.YahooFinance.DivTable;
 import com.idylwood.yahoo.YahooFinance.Pair;
-import com.idylwood.yahoo.YahooFinance.SplitTable;
-import com.idylwood.yahoo.YahooFinance.Single;
 
 public class FinUtils {
 

@@ -35,6 +35,10 @@ public class Date implements Comparable<Date> {
 		month = (date / 100) % 100;
 		day = date % 100;
 	}
+	public Date(final int year, final int month, final int day)
+	{
+		this.year = year; this.month = month; this.day = day;
+	}
 	// YYYY-MM-DD
 	public Date(String date) {
 		String [] arr = date.split("-");
@@ -78,6 +82,18 @@ public class Date implements Comparable<Date> {
 		date.setYear(this.year - 1900);
 		date.setMonth(this.month - 1);
 		return date;
+	}
+	public final Date setYear(final int year)
+	{
+		return new Date(year,this.month, this.day);
+	}
+	public final Date setMonth(final int month)
+	{
+		return new Date(this.year, month, this.day);
+	}
+	public final Date setDay(final int day)
+	{
+		return new Date(this.year, this.month, day);
 	}
 
 	// This is consistent with the constructor in that

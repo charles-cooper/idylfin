@@ -26,6 +26,9 @@
 
 package com.idylwood.yahoo;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.EnumSet;
 
 import com.idylwood.yahoo.Date;
@@ -106,12 +109,11 @@ public class Quote {
 			// this is like the worst invention ever
 			time_accessed = System.currentTimeMillis();
 			ticker = symbol;
-			//company_name = tokens[0];
 			bid = Double.parseDouble(tokens[idx(Tag.BID_REALTIME)]);
 			ask = Double.parseDouble(tokens[idx(Tag.ASK_REALTIME)]);
 			last_price = Double.parseDouble(tokens[idx(Tag.LAST_TRADE_PRICE_ONLY)]);
-			dividend_yield = Double.parseDouble(tokens[idx(Tag.DIVIDEND_YIELD)]);
-			dividend_per_share = Double.parseDouble(tokens[idx(Tag.DIVIDEND_PER_SHARE)]);
+			dividend_yield = parseDoubleCheckNA(tokens[idx(Tag.DIVIDEND_YIELD)]);
+			dividend_per_share = parseDoubleCheckNA(tokens[idx(Tag.DIVIDEND_PER_SHARE)]);
 			previous_close = Double.parseDouble(tokens[idx(Tag.PREVIOUS_CLOSE)]);
 			open = Double.parseDouble(tokens[idx(Tag.OPEN)]);
 			days_low = Double.parseDouble(tokens[idx(Tag.DAYS_LOW)]);
@@ -135,26 +137,41 @@ public class Quote {
 
 			// dates are tricky so they get their own block
 			final java.util.Date todaysDate = new java.util.Date(time_accessed);
-			java.text.DateFormat df = new java.text.SimpleDateFormat("MMM dd"); // eg Jun 28
-			java.util.Date parsed = df.parse(tokens[indexOf(quoteTags,Tag.DIVIDEND_PAY_DATE)]);
-			parsed.setYear(todaysDate.getYear());
-			dividend_pay_date = new Date(parsed);
-			parsed = df.parse(tokens[indexOf(quoteTags,Tag.DIVIDEND_EX_DATE)]);
-			parsed.setYear(todaysDate.getYear());
-			dividend_ex_date = new Date(parsed);
-			df = new java.text.SimpleDateFormat("mm/dd/yyyy");
-			last_trade_date = new Date(df.parse(tokens[indexOf(quoteTags,Tag.LAST_TRADE_DATE)]));
+			DateFormat df = new SimpleDateFormat("MMM dd"); // eg Jun 28
+			dividend_pay_date = parseDate(tokens[indexOf(quoteTags,Tag.DIVIDEND_PAY_DATE)])
+				.setYear(todaysDate.getYear());
+			dividend_ex_date = parseDate(tokens[indexOf(quoteTags,Tag.DIVIDEND_EX_DATE)])
+				.setYear(todaysDate.getYear());
+			df = new SimpleDateFormat("mm/dd/yyyy");
+			last_trade_date = parseDate(tokens[indexOf(quoteTags,Tag.LAST_TRADE_DATE)]);
 		}
 		catch (java.text.ParseException e)
 		{
-			throw new RuntimeException("You have bug!", e);
+			throw new RuntimeException("You have bug on ticker: "+symbol+"!", e);
 		}
+	}
+	private static final String[] dateFormats = {"MMM dd", "mm/dd/yyyy", "yy-MMM-dd"};
+	private static final Date parseDate(final String s)
+		throws ParseException
+	{
+		if ("N/A".equals(s))
+			return new Date(0);
+		// this is fracking terrible.
+		// just try every single format
+		for (final String fmt : dateFormats)
+		{
+			try
+			{
+				final DateFormat df = new SimpleDateFormat(fmt);
+				return new Date(df.parse(s.replaceAll("\\s+", " ")));
+			} catch (ParseException e) {}
+		}
+		throw new ParseException("Unparseable date: "+s, 0);
 	}
 
 	private static final double parseDoubleCheckNA(final String s)
 	{
 		if ("N/A".equals(s))
-			//return Double.NaN;
 			return 0;
 		return Double.parseDouble(s);
 	}

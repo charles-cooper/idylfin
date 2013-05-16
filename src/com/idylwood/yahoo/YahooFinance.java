@@ -273,7 +273,9 @@ public final class YahooFinance
 		return ret;
 	}
 
-	List<Quote> DownloadQuotes(final String... symbols)
+	final boolean DBG_QUOTES = false;
+	// Low level API
+	public List<Quote> DownloadQuotes(final String... symbols)
 		throws IOException
 	{
 		final List<Quote> ret = new ArrayList<Quote>(symbols.length);
@@ -281,28 +283,37 @@ public final class YahooFinance
 		final QuoteUrlBuilder qub = new QuoteUrlBuilder();
 		qub.addTags(Quote.quoteTags);
 		qub.addSymbols(Arrays.asList(symbols));
-		/*
-		System.out.println(qub.prepare());
-		System.out.println(Quote.quoteTags);
-		*/
+		if (DBG_QUOTES)
+		{
+			System.out.println(qub.prepare());
+			System.out.println(Quote.quoteTags);
+		}
 		final CSVReader csv = new CSVReader(new InputStreamReader(qub.prepare().toURL().openStream()));
 		final List<String[]> allLines = csv.readAll();
 		csv.close();
 		int i = 0;
 		for (final String line[] : allLines)
 		{
-			/*
-			for (final String s : line)
-				System.out.print(s+", ");
-			System.out.println();
-			*/
+			if (DBG_QUOTES)
+			{
+				for (final String s : line)
+					System.out.print(s+", ");
+				System.out.println();
+			}
 			ret.add(new Quote(symbols[i], line));
 			++i;
 		}
 		return ret;
 	}
 
-	List<Quote> Quotes(final String... tickers)
+	public Quote getQuote(final String ticker)
+		throws IOException
+	{
+		// yeah this is awesome
+		return Quotes(ticker).get(0);
+	}
+
+	public List<Quote> Quotes(final String... tickers)
 		throws IOException
 	{
 		final List<Quote> ret = new ArrayList<Quote>(tickers.length);
@@ -316,7 +327,6 @@ public final class YahooFinance
 				if (null==q || System.currentTimeMillis() - q.time_accessed > TwentyFourHours)
 					needed_quotes.add(ticker);
 			}
-			//System.out.println(Arrays.toString(needed_quotes.toArray(new String[needed_quotes.size()]).length));
 			List<Quote> downloaded = DownloadQuotes(needed_quotes.toArray(new String[needed_quotes.size()]));
 			int i = 0;
 			for (final Quote q : downloaded)
@@ -483,7 +493,7 @@ public final class YahooFinance
 		logTime("start");
 		yf.Quotes("BAC");
 		logTime("done");
-		List<Quote> quotes = yf.Quotes("BAC");
+		List<Quote> quotes = yf.Quotes("AMZN");
 		logTime("done");
 		for (final Quote q : quotes)
 			System.out.println(q.dividend_yield);
