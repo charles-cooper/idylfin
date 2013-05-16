@@ -153,7 +153,6 @@ public class QuoteUrlBuilder extends UrlBuilder {
 	public QuoteUrlBuilder addTags(Collection<Tag> tags)
 	{
 		mTags.addAll(tags);
-		System.out.println(mTags);
 		return this;
 	}
 	private void setTags(final String tags)

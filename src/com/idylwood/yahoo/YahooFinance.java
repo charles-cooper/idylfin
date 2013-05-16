@@ -52,6 +52,7 @@ public final class YahooFinance
 	final Map<String,DivTable> mDividends = new HashMap<String,DivTable>();
 	final Map<String,SplitTable> mSplits = new HashMap<String,SplitTable>();
 	final Map<String,DivSplitTable> mDivSplits = new HashMap<String,DivSplitTable>();
+	final Map<String,Quote> mQuotes = new HashMap<String,Quote>();
 
 	// Surprisingly useful class which contains two doubles and a date.
 	// TODO refactor to extend Date
@@ -272,19 +273,21 @@ public final class YahooFinance
 		return ret;
 	}
 
-	// TODO make this work
 	List<Quote> DownloadQuotes(final String... symbols)
 		throws IOException
 	{
+		final List<Quote> ret = new ArrayList<Quote>(symbols.length);
+		if (0==symbols.length) return ret;
 		final QuoteUrlBuilder qub = new QuoteUrlBuilder();
 		qub.addTags(Quote.quoteTags);
 		qub.addSymbols(Arrays.asList(symbols));
+		/*
 		System.out.println(qub.prepare());
-		//System.out.println(Quote.quoteTags);
+		System.out.println(Quote.quoteTags);
+		*/
 		final CSVReader csv = new CSVReader(new InputStreamReader(qub.prepare().toURL().openStream()));
 		final List<String[]> allLines = csv.readAll();
 		csv.close();
-		final List<Quote> ret = new ArrayList<Quote>(allLines.size());
 		int i = 0;
 		for (final String line[] : allLines)
 		{
@@ -299,17 +302,31 @@ public final class YahooFinance
 		return ret;
 	}
 
-	// TODO make this work
-	private Map<String,Quote> mQuotes = new HashMap<String,Quote>();
-	private Collection<Quote> Quotes(final String... symbols)
+	List<Quote> Quotes(final String... tickers)
+		throws IOException
 	{
-		final List<Quote> ret = new ArrayList<Quote>(symbols.length);
-		for (String symbol : symbols)
+		final List<Quote> ret = new ArrayList<Quote>(tickers.length);
+		final List<String> needed_quotes = new ArrayList<String>(tickers.length);
+		synchronized(mQuotes)
 		{
+			// download needed quotes
+			for (final String ticker : tickers)
+			{
+				final Quote q = mQuotes.get(ticker);
+				if (null==q || System.currentTimeMillis() - q.time_accessed > TwentyFourHours)
+					needed_quotes.add(ticker);
+			}
+			//System.out.println(Arrays.toString(needed_quotes.toArray(new String[needed_quotes.size()]).length));
+			List<Quote> downloaded = DownloadQuotes(needed_quotes.toArray(new String[needed_quotes.size()]));
+			int i = 0;
+			for (final Quote q : downloaded)
+				mQuotes.put(tickers[i++], q);
+			// return them in order requested
+			for (final String ticker : tickers)
+				ret.add(mQuotes.get(ticker));
 		}
 		return ret;
 	}
-
 
 	// Downloads stuff from Yahoo Finance
 	public HistTable DownloadHistoricalPrices(String symbol)
@@ -455,11 +472,21 @@ public final class YahooFinance
 	public static void main(String args[])
 		throws IOException, java.text.ParseException
 	{
+		/*
 		final YahooFinance yf = YahooFinance.getInstance();
 		final String []symbols = new String[]{"BAC","JPM","AAPL","INTC","MSFT"};
 		final List<Quote> quotes = yf.DownloadQuotes(symbols);
 		final double[] weights_earnings = FinUtils.weightByEarnings(quotes);
 		final double[] weights_market_cap = FinUtils.weightByMarketCap(quotes);
+		*/
+		YahooFinance yf = YahooFinance.getInstance();
+		logTime("start");
+		yf.Quotes("BAC");
+		logTime("done");
+		List<Quote> quotes = yf.Quotes("BAC");
+		logTime("done");
+		for (final Quote q : quotes)
+			System.out.println(q.dividend_yield);
 
 		/*
 		final Date today = new Date(new java.util.Date());
@@ -469,7 +496,6 @@ public final class YahooFinance
 		for (final String symbol : symbols)
 			tables[i++] = yf.HistoricalPrices(symbol,start,today).AdjustOHLCWithReinvestment();
 		final double[] weights_markowitz = FinUtils.MarkowitzPortfolio(tables);
-		*/
 
 		System.out.println(Arrays.toString(symbols));
 		//System.out.println("Markowitz");
@@ -483,6 +509,7 @@ public final class YahooFinance
 		MathUtils.printArray(FinUtils.weightByDividendYield(quotes));
 		System.out.println("Div per share");
 		MathUtils.printArray(FinUtils.weightByDividends(quotes));
+		*/
 	}
 }
 
