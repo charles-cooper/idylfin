@@ -68,7 +68,7 @@ public class Quote {
 	// don't use this since it doesn't make sense. use market cap instead
 	//public final double shares_outstanding;
 	public final double market_cap;
-	
+
 	public final long volume;
 	public final long average_daily_volume;
 	static final EnumSet<Tag> quoteTags =
@@ -168,7 +168,6 @@ public class Quote {
 		}
 		throw new ParseException("Unparseable date: "+s, 0);
 	}
-
 	private static final double parseDoubleCheckNA(final String s)
 	{
 		if ("N/A".equals(s))
@@ -196,5 +195,12 @@ public class Quote {
 		}
 		return -1;
 	}
-
+	public double sharesOutstanding()
+	{
+		return this.market_cap / this.last_price;
+	}
+	public double earnings()
+	{
+		return this.earnings_per_share * sharesOutstanding();
+	}
 }

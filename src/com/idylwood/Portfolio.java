@@ -3,14 +3,12 @@ package com.idylwood;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
 import au.com.bytecode.opencsv.CSVReader;
 
-import com.idylwood.yahoo.Quote;
 import com.idylwood.yahoo.YahooFinance;
 
 public class Portfolio {
@@ -65,6 +63,7 @@ public class Portfolio {
 		final Reader reader = new FileReader("/media/files/Downloads/QQQHoldings.csv");
 		final CSVReader csv = new CSVReader(reader);
 		final List<String[]> allLines = csv.readAll();
+		csv.close();
 		allLines.remove(0);
 		final Portfolio p = new Portfolio();
 		for (final String[] line : allLines)
