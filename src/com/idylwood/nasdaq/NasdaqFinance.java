@@ -72,18 +72,17 @@ public class NasdaqFinance {
 
 	public static class CompanyList
 	{
-		final long time_accessed;
-		final List<Company> data;
-		private CompanyList(final List<Company> data, final long time_accessed)
+		final long time_accessed = System.currentTimeMillis();
+		public final List<Company> data;
+		private CompanyList(final List<Company> data)
 		{
-			this.time_accessed = time_accessed;
 			this.data = Collections.unmodifiableList(data);
 		}
 		public enum Exchange
 		{
 			NYSE,NASDAQ,AMEX
 		}
-		static CompanyList get(Exchange ex)
+		public static CompanyList get(Exchange ex)
 			throws IOException, MalformedURLException
 		{
 			URL url = new URL("http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange="+ex+"&render=download");
@@ -98,19 +97,20 @@ public class NasdaqFinance {
 				if (0==i++) continue;
 				data.add(new Company(line));
 			}
-			return new CompanyList(data,System.currentTimeMillis());
+			return new CompanyList(data);
 		}
 	}
-	public static class Company {
-		final String ticker;
-		final String name;
-		final double last_sale;
-		final double market_cap;
-		final String adr_tso; // what is this
-		final int ipo_year;
-		final String sector;
-		final String industry;
-		final URL summary_url;
+	public static class Company
+	{
+		public final String ticker;
+		public final String name;
+		public final double last_sale;
+		public final double market_cap;
+		public final String adr_tso; // what is this
+		public final int ipo_year;
+		public final String sector;
+		public final String industry;
+		public final URL summary_url;
 		public Company(final String[] tokens)
 		{
 			if (10!=tokens.length) // fracking has an extra comma
