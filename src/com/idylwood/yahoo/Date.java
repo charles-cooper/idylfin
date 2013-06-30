@@ -25,12 +25,15 @@
  */
 package com.idylwood.yahoo;
 
+import org.joda.time.DateTime;
+// TODO get rid of this fracking class and just use DateTime
+
 public class Date implements Comparable<Date> {
 	final int year;
 	final int month;
 	final int day;
 	// Dates in format YYYYMMDD
-	public Date(int date) {
+	public Date(final int date) {
 		year = date / 10000;
 		month = (date / 100) % 100;
 		day = date % 100;
@@ -39,19 +42,41 @@ public class Date implements Comparable<Date> {
 	{
 		this.year = year; this.month = month; this.day = day;
 	}
+	public Date subtractDays(final int n)
+	{
+		return new Date(this.year, this.month, this.day - n);
+	}
+	public Date subtractMonths(final int n)
+	{
+		return new Date(this.year, this.month - n, this.day);
+	}
+	private DateTime toJoda()
+	{
+		return new DateTime(this.year, this.month, this.day, 0, 0);
+	}
+	private Date(final DateTime dt) { this(dt.year().get(), dt.monthOfYear().get(), dt.dayOfMonth().get()); }
+	public Date addMonths(final int n)
+	{
+		final DateTime dt = this.toJoda();
+		return new Date(dt.plusMonths(n));
+	}
+	public Date subtractYears(final int n)
+	{
+		return new Date(this.year - n, this.month, this.day);
+	}
 	// YYYY-MM-DD
-	public Date(String date) {
+	public Date(final String date) {
 		String [] arr = date.split("-");
 		year = Integer.parseInt(arr[0]);
 		month = Integer.parseInt(arr[1]);
 		day = Integer.parseInt(arr[2]);
 	}
 	// Copy constructor
-	public Date(Date other) {
+	public Date(final Date other) {
 		this.year = other.year; this.month = other.month; this.day = other.day;
 	}
 	@SuppressWarnings("deprecation")
-	public Date(java.util.Date date) {
+	public Date(final java.util.Date date) {
 		year = date.getYear() + 1900; // java.util.Date year starts at 1900
 		month = date.getMonth()+1;
 		day = date.getDate();
