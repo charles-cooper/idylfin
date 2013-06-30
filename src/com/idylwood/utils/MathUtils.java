@@ -923,7 +923,7 @@ public final class MathUtils {
 	// Numerically precise dot product. Returns MathUtils.sumSlow(MathUtils.multiply(x,y));
 	// O(n) time and O(n) space.
 	// TODO make if faster by not allocating new array in multiply().
-	static final double linearCombinationSlow(final double[]x,final double[]y)
+	public static final double linearCombinationSlow(final double[]x,final double[]y)
 	{
 		return sumSlow(multiply(x,y));
 	}

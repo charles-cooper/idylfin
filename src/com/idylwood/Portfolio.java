@@ -12,6 +12,7 @@ import au.com.bytecode.opencsv.CSVReader;
 
 import com.idylwood.misc.PowerShares;
 import com.idylwood.utils.FinUtils;
+import com.idylwood.utils.MathUtils;
 import com.idylwood.yahoo.Date;
 import com.idylwood.yahoo.HistTable;
 import com.idylwood.yahoo.HistRow;
@@ -21,7 +22,7 @@ public class Portfolio {
 	class Item
 	{
 		final String ticker;
-		double weight;
+		final double weight;
 		public Item(final String ticker, final double weight)
 		{
 			this.ticker = ticker; this.weight = weight;
@@ -91,7 +92,30 @@ public class Portfolio {
 				.AdjustOHLCWithReinvestment();
 		return totalReturn(tables);
 	}
-	private static double totalReturn(final HistTable[] tables)
+	private static Portfolio reassignWeights(final Portfolio arg, final double[] weights)
+	{
+		final Portfolio ret = new Portfolio();
+		int i = 0;
+		for (final Item it : items)
+			ret.add(new Item(it.ticker, weights[i++]));
+		return ret;
+	}
+	public Portfolio markowitzOptimize(final Date begin, final Date end)
+		throws IOException
+	{
+		final HistTable data[] = FinUtils.merge(tables());
+		for (int i = 0; i < data.length; i++)
+			data[i] = data[i].SubTable(begin,end).AdjustOHLCWithReinvestment();
+		final double portfolio_return = Math.abs(totalLogReturn(data));
+		return reassignWeights(this, MarkowitzPortfolio(data, portfolio_return));
+	}
+	// start of backtesting interface
+	private void doBacktest()
+		throws IOException
+	{
+		final HistTable data[] = FinUtils.merge(tables());
+	}
+	private double totalLogReturn(final HistTable[] tables)
 		throws IOException
 	{
 		// assume dividends reinvestment strategy is just
@@ -111,7 +135,7 @@ public class Portfolio {
 		}
 		final double epsilon = 1e-3;
 		System.out.println(MathUtils.sumSlow(weights));
-		return linearCombinationSlow(returns,weights);
+		return MathUtils.linearCombinationSlow(returns,weights);
 	}
 	public static void main(String[]args)
 		throws IOException, FileNotFoundException
@@ -128,9 +152,12 @@ public class Portfolio {
 			//p.items.add(p.new Item(line[2], Double.parseDouble(line[4]) / 100));
 			p.items.add(p.new Item(line[1], Double.parseDouble(line[2])/100));
 		final HistTable table = FinUtils.merge(p.tables())[0];
-		for (final HistRow row : table.data)
+		final Date end = table.data.get(table.data.size()-1).date;
+		final Date begin = end.subtractYears(1);
+		final HistTable foo = table.SubTable(begin,end);
+		for (final HistRow row : foo.data)
 			System.out.println(row);
-		System.out.println(p.totalReturn());
+		System.out.println(p.totalReturn(begin,end));
 		/*
 		System.out.println("Market Cap: "+p.marketCap());
 		System.out.println("Earnings: "+p.earnings());
