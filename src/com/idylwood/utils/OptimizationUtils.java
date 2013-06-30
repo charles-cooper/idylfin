@@ -30,20 +30,6 @@ package com.idylwood.utils;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-/*
-import org.apache.commons.math3.optim.InitialGuess;
-import org.apache.commons.math3.optim.MaxIter;
-import org.apache.commons.math3.optim.SimpleValueChecker;
-import org.apache.commons.math3.optim.linear.LinearConstraint;
-import org.apache.commons.math3.optim.linear.LinearConstraintSet;
-import org.apache.commons.math3.optim.linear.LinearObjectiveFunction;
-import org.apache.commons.math3.optim.linear.NonNegativeConstraint;
-import org.apache.commons.math3.optim.linear.Relationship;
-import org.apache.commons.math3.optim.linear.SimplexSolver;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
-import org.apache.commons.math3.optim.nonlinear.scalar.gradient.NonLinearConjugateGradientOptimizer;
-*/
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 
 // Holder class for new stuff which hasn't had the dependencies gotten rid of yet.

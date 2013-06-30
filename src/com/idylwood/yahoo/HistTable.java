@@ -48,8 +48,7 @@ public class HistTable
 	final public List<HistRow> data;
 	public boolean splitAdjusted = false; // TODO declare these final.
 	public boolean dividendAdjusted = false;
-	public HistTable(String symbol, long dateAccessed,
-			List<HistRow> data)
+	public HistTable(final String symbol, final long dateAccessed, final List<HistRow> data)
 	{
 		this.symbol=symbol; this.dateAccessed = dateAccessed; this.data = data;
 	}

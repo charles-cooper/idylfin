@@ -28,8 +28,6 @@ package com.idylwood.yahoo;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.math3.stat.regression.*;
 

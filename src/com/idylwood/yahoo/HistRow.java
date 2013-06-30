@@ -44,7 +44,7 @@ public class HistRow implements Comparable<Date>
 		return date + "," + open + "," + high 
 			+ "," + low + "," + close + "," +volume + "," + adj_close;
 	}
-	@Override public int compareTo(Date date)
+	@Override public int compareTo(final Date date)
 	{
 		return this.date.compareTo(date);
 	}
@@ -57,16 +57,16 @@ public class HistRow implements Comparable<Date>
 		this.close = close; this.volume = volume; this.adj_close = adj_close;
 	}
 	// Copy constructor
-	public HistRow(HistRow other)
+	public HistRow(final HistRow other)
 	{
 		this(new Date(other.date),other.open,other.high,other.low,other.close,
 				other.volume,other.adj_close);
 		// equivalent to this(other.toString());
 	}
 
-	public HistRow(String row)
+	public HistRow(final String row)
 	{
-		String [] elems = row.split(",");
+		final String [] elems = row.split(",");
 		date = new Date(elems[0]);
 		open = Double.parseDouble(elems[1]);
 		high = Double.parseDouble(elems[2]);

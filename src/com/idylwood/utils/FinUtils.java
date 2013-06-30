@@ -56,10 +56,11 @@ public class FinUtils {
 		List<Pair> ret = new ArrayList<Pair>(len);
 		int idx1 = 0;
 		int idx2 = 0;
-		while (true)
+		//while (true)
+		for (; idx1!=table1.data.size() && idx2!=table2.data.size(); idx1++,idx2++)
 		{
-			if (idx1==table1.data.size()) break;
-			if (idx2==table2.data.size()) break;
+			//if (idx1==table1.data.size()) break;
+			//if (idx2==table2.data.size()) break;
 			HistRow row1 = table1.data.get(idx1);
 			HistRow row2 = table2.data.get(idx2);
 			if (row1.date.toInt() > row2.date.toInt())
@@ -77,9 +78,6 @@ public class FinUtils {
 			pair.first = row1.adj_close;
 			pair.second = row2.adj_close;
 			ret.add(pair);
-	
-			++idx1;
-			++idx2;
 		}
 		return ret;
 	}
@@ -216,14 +214,14 @@ public class FinUtils {
 	{
 		double maxDrawdown = 0;
 		double peak = 0;
-		for (double x : data)
+		for (final double x : data)
 		{
 			if (peak < x)
 			{
 				peak = x;
 				continue;
 			}
-			double drawdown = -Math.log(x / peak);
+			final double drawdown = -Math.log(x / peak);
 			if (drawdown < 0) throw new RuntimeException("You have bug!");
 			if (drawdown > maxDrawdown) maxDrawdown = drawdown;
 		}
@@ -325,6 +323,41 @@ public class FinUtils {
 		}
 		final double mean_return = Math.max(0, MathUtils.mean(mean_returns));
 		return MarkowitzPortfolio(adjusted_tables, mean_return);
+	}
+	/** selects the rows which all tables have. */
+	public static final HistTable[] merge(final HistTable[] raw_tables)
+	{
+		final List<Date> dates_all_have = new ArrayList<Date>();
+		// complicated thing to avoid n^2 or n log n search.
+		final int len = raw_tables.length;
+		final int[] idx = new int[len];
+		Arrays.fill(idx,0);
+		final HistTable[] ret = new HistTable[len];
+		for (int i = 0; i < len; i++)
+			ret[i] = new HistTable(raw_tables[i].symbol, raw_tables[i].dateAccessed, new ArrayList<HistRow>());
+		boolean exit = false;
+		while (!exit)
+		{
+			Date min_date = raw_tables[0].data.get(idx[0]).date;
+			boolean all_have = true;
+			for (int i = 0; i < len; i++)
+			{
+				// min_date - other.date > 0 ==> min_date > other.date
+				if (min_date.compareTo(raw_tables[i].data.get(idx[i]).date) > 0)
+					min_date = raw_tables[i].data.get(idx[i]).date;
+				if (0!=min_date.compareTo(raw_tables[i].data.get(idx[i]).date))
+					all_have = false;
+			}
+			if (all_have)
+				for (int i = 0; i < len; i++)
+					ret[i].data.add(raw_tables[i].data.get(idx[i]));
+			// increment the laggards
+			for (int i = 0; i < len; i++)
+				if (0==min_date.compareTo(raw_tables[i].data.get(idx[i]).date))
+					if (++idx[i] == raw_tables[i].data.size())
+						exit = true;
+		}
+		return ret;
 	}
 	public static final double[] weightByEarnings(List<Quote> quotes)
 	{
