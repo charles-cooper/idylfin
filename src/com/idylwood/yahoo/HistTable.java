@@ -232,9 +232,9 @@ public class HistTable
 			while (true)
 			{
 				row = this.data.get(idx++);
-				if (0==row.date.compareTo((Date)s)) break;
+				if (row.date.compareTo((Date)s) >= 0) break;
 			}
-			double ratio = 1 + (s.data / row.close); // the percentage + 1.
+			final double ratio = 1 + (s.data / row.close); // the percentage + 1.
 			ratios.add(new YahooFinance.Single(s,ratio)); // recall the constructor Single(Date, double)
 		}
 		// running ratio
