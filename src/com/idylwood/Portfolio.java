@@ -97,20 +97,21 @@ public class Portfolio {
 		// assume dividends reinvestment strategy is just
 		// each symbol that pays a dividend is reinvested
 		// in that company.
-		double ret = 0;
-		double sanity_check = 0;
+		final double returns[] = new double[items.size()];
+		final double weights[] = new double[items.size()];
 		// fwahaha abusing the final keyword
 		for (int i = 0; i < items.size(); i++)
 		{
 			final Item it = items.get(i);
 			final HistTable table = tables[i];
-			ret += FinUtils.totalReturn(table.CloseArray()) * it.weight;
-			sanity_check += it.weight;
+			//ret += FinUtils.totalReturn(table.CloseArray()) * it.weight;
+			//sanity_check += it.weight;
+			returns[i] = FinUtils.totalReturn(table.CloseArray());
+			weights[i] = it.weight;
 		}
 		final double epsilon = 1e-3;
-		if (Math.abs(1 - sanity_check) > epsilon)
-			throw new RuntimeException("You probably have bug! " + sanity_check);
-		return ret;
+		System.out.println(MathUtils.sumSlow(weights));
+		return linearCombinationSlow(returns,weights);
 	}
 	public static void main(String[]args)
 		throws IOException, FileNotFoundException
