@@ -1,7 +1,7 @@
 package com.idylwood;
 
 import java.io.FileNotFoundException;
-//import java.io.FileReader;
+import java.io.FileReader;
 import java.io.StringReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -91,7 +91,7 @@ public class Portfolio {
 				.AdjustOHLCWithReinvestment();
 		return totalReturn(tables);
 	}
-	private double totalReturn(final HistTable[] tables)
+	private static double totalReturn(final HistTable[] tables)
 		throws IOException
 	{
 		// assume dividends reinvestment strategy is just
@@ -115,15 +115,17 @@ public class Portfolio {
 	public static void main(String[]args)
 		throws IOException, FileNotFoundException
 	{
-		final Reader reader = new StringReader(PowerShares.getFundHoldings("QQQ"));
+		final Reader reader = //new StringReader(PowerShares.getFundHoldings("QQQ"));
 		//new FileReader("/media/files/Downloads/QQQHoldings.csv");
+			new FileReader("/media/files/Downloads/DIA_All_Holdings.csv");
 		final CSVReader csv = new CSVReader(reader);
 		final List<String[]> allLines = csv.readAll();
 		csv.close();
 		allLines.remove(0);
 		final Portfolio p = new Portfolio();
 		for (final String[] line : allLines)
-			p.items.add(p.new Item(line[2], Double.parseDouble(line[4]) / 100));
+			//p.items.add(p.new Item(line[2], Double.parseDouble(line[4]) / 100));
+			p.items.add(p.new Item(line[1], Double.parseDouble(line[2])/100));
 		final HistTable table = FinUtils.merge(p.tables())[0];
 		for (final HistRow row : table.data)
 			System.out.println(row);
