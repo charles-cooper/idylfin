@@ -52,29 +52,29 @@ public class FinUtils {
 	// TODO change this into some sort of 2D matrix.
 	public static List<Pair> merge(HistTable table1, HistTable table2)
 	{
-		final int len = Math.min(table1.data.size(), table2.data.size());
+		final int len = Math.min(table1.size(), table2.size());
 		List<Pair> ret = new ArrayList<Pair>(len);
 		int idx1 = 0;
 		int idx2 = 0;
 		//while (true)
-		for (; idx1!=table1.data.size() && idx2!=table2.data.size(); idx1++,idx2++)
+		for (; idx1!=table1.size() && idx2!=table2.size(); idx1++,idx2++)
 		{
 			//if (idx1==table1.data.size()) break;
 			//if (idx2==table2.data.size()) break;
-			HistRow row1 = table1.data.get(idx1);
-			HistRow row2 = table2.data.get(idx2);
-			if (row1.date.toInt() > row2.date.toInt())
+			HistRow row1 = table1.get(idx1);
+			HistRow row2 = table2.get(idx2);
+			if (row1.toInt() > row2.toInt())
 			{
 				++idx2;
 				continue;
 			}
-			if (row1.date.toInt() < row2.date.toInt())
+			if (row1.toInt() < row2.toInt())
 			{
 				++idx1;
 				continue;
 			}
 			YahooFinance.Pair pair = new YahooFinance.Pair();
-			pair.date = new Date(row1.date.toInt());
+			pair.date = new Date(row1.toInt());
 			pair.first = row1.adj_close;
 			pair.second = row2.adj_close;
 			ret.add(pair);
@@ -86,7 +86,7 @@ public class FinUtils {
 	{
 		final double[] logReturns = MathUtils.diff(MathUtils.log(data));
 		final double[] benchmarkReturns = MathUtils.diff(MathUtils.log(benchmark));
-		final double [] difference = MathUtils.subtract(logReturns,benchmarkReturns);
+		final double[] difference = MathUtils.subtract(logReturns,benchmarkReturns);
 		final double mean = MathUtils.mean(difference);
 		return mean / MathUtils.stdev(difference,mean);
 	}
@@ -181,7 +181,7 @@ public class FinUtils {
 	public static final double totalReturn(final HistTable table)
 	{
 		checkAdjusted(table);
-		return table.data.get(table.data.size()-1).close / table.data.get(0).close;
+		return table.get(table.size()-1).close / table.get(0).close;
 	}
 
 	final public static double TreynorRatio(final double[] data, double [] benchmark)
@@ -318,46 +318,9 @@ public class FinUtils {
 		checkAdjusted(adjusted_tables);
 		final double[] mean_returns = new double[adjusted_tables.length];
 		for (int i = 0; i < adjusted_tables.length; i++)
-		{
-			mean_returns[i] = FinUtils.totalLogReturn(adjusted_tables[i]) / adjusted_tables[i].data.size();
-		}
-		final double mean_return = Math.max(0, MathUtils.mean(mean_returns));
+			mean_returns[i] = FinUtils.totalLogReturn(adjusted_tables[i]) / adjusted_tables[i].size();
+		final double mean_return = MathUtils.abs(MathUtils.mean(mean_returns));
 		return MarkowitzPortfolio(adjusted_tables, mean_return);
-	}
-	/** selects the rows which all tables have. */
-	public static final HistTable[] merge(final HistTable[] raw_tables)
-	{
-		final List<Date> dates_all_have = new ArrayList<Date>();
-		// complicated thing to avoid n^2 or n log n search.
-		final int len = raw_tables.length;
-		final int[] idx = new int[len];
-		Arrays.fill(idx,0);
-		final HistTable[] ret = new HistTable[len];
-		for (int i = 0; i < len; i++)
-			ret[i] = new HistTable(raw_tables[i].symbol, raw_tables[i].dateAccessed, new ArrayList<HistRow>());
-		boolean exit = false;
-		while (!exit)
-		{
-			Date min_date = raw_tables[0].data.get(idx[0]).date;
-			boolean all_have = true;
-			for (int i = 0; i < len; i++)
-			{
-				// min_date - other.date > 0 ==> min_date > other.date
-				if (min_date.compareTo(raw_tables[i].data.get(idx[i]).date) > 0)
-					min_date = raw_tables[i].data.get(idx[i]).date;
-				if (0!=min_date.compareTo(raw_tables[i].data.get(idx[i]).date))
-					all_have = false;
-			}
-			if (all_have)
-				for (int i = 0; i < len; i++)
-					ret[i].data.add(raw_tables[i].data.get(idx[i]));
-			// increment the laggards
-			for (int i = 0; i < len; i++)
-				if (0==min_date.compareTo(raw_tables[i].data.get(idx[i]).date))
-					if (++idx[i] == raw_tables[i].data.size())
-						exit = true;
-		}
-		return ret;
 	}
 	public static final double[] weightByEarnings(List<Quote> quotes)
 	{

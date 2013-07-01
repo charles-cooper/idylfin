@@ -29,7 +29,10 @@ package com.idylwood.yahoo;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Iterator;
 
 import com.idylwood.utils.MathUtils;
 import com.idylwood.yahoo.YahooFinance.DivSplitTable;
@@ -38,19 +41,20 @@ import com.idylwood.yahoo.YahooFinance.Single;
 import com.idylwood.yahoo.YahooFinance.SplitTable;
 
 
-public class HistTable
+public class HistTable implements Iterable<HistRow>
 {
 	final public String symbol;
 	final public long dateAccessed;
 	// Note: this is not thread safe! assume there are no methods which modify this!
 	// TODO make this an immutable list. note that a lot of these methods could be optimized better
 	// if the data structures were immutable.
-	final public List<HistRow> data;
+	final private List<HistRow> data; // TODO this should become private.
 	public boolean splitAdjusted = false; // TODO declare these final.
 	public boolean dividendAdjusted = false;
 	public HistTable(final String symbol, final long dateAccessed, final List<HistRow> data)
 	{
-		this.symbol=symbol; this.dateAccessed = dateAccessed; this.data = data;
+		this.symbol=symbol; this.dateAccessed = dateAccessed;
+		this.data = Collections.unmodifiableList(data);
 	}
 	/**
 	 * Returns true iff it has been both split and dividend adjusted.
@@ -63,28 +67,23 @@ public class HistTable
 	}
 
 	/**
-	 * Returns a newly allocated HistTable. Not just a 'view'.
+	 * Returns a newly allocated HistTable whose internal data is a view of the parent's data.
 	 * If the start and end date are not within the table's start and end,
 	 * it will return a newly allocated HistTable with not very much (nothing) in it
-	 * Note that the returned table has ill defined values if the table has already
-	 * been adjusted for splits or dividends.
+	 * Note that you should be careful when adjusting for splits and dividends; i.e.
+	 * table#SubTable#AdjustOHLC() is NOT the same as table#AdjustOHLC()#SubTable
+	 * since #AdjustOHLC() always adjusts to the first element in the table.
 	 * Side Effects: allocation of new HistTable
 	 * @param start
 	 * @param end
 	 * @return
 	 */
-	public HistTable SubTable(Date start, Date end)
+	public HistTable SubTable(final Date start, final Date end)
 	{
-		if (this.dividendAdjusted||this.splitAdjusted)
-			throw new RuntimeException("Shouldn't try to get subtable of split or dividend adjusted table!");
-		final List<HistRow> list = new ArrayList<HistRow>(end.subtract(start));
-		HistTable ret = new HistTable(this.symbol,this.dateAccessed,list);
-		for (HistRow row : this.data)
-			if (row.date.compareTo(start)>=0 && row.date.compareTo(end)<= 0)
-				ret.data.add(new HistRow(row));
-		return ret;
+		int start_idx = ceil_idx(start);
+		int end_idx = floor_idx(end);
+		return new HistTable(this.symbol, this.dateAccessed, this.data.subList(start_idx, end_idx));
 	}
-
 	/**
 	 * Returns the date of the first entry.
 	 * Side Effects: none
@@ -94,7 +93,6 @@ public class HistTable
 	{
 		return data.get(0).date;
 	}
-
 	/**
 	 * Returns the date of the last entry.
 	 * Side Effects: none
@@ -105,6 +103,66 @@ public class HistTable
 		return data.get(data.size()-1).date;
 	}
 
+	// if it's not in the list, returns ~insertion_point as in Collections#binarySearch
+	public int idx(final Date date)
+	{
+		return Collections.binarySearch(this.data, date);
+	}
+	// if it's not in the list, returns the first date before it.
+	private int floor_idx(final Date date)
+	{
+		final int idx = idx(date);
+		if (idx < 0)
+			return ~idx - 1;
+		return idx;
+	}
+	// if it's not in the list, returns the first date after it.
+	private int ceil_idx(final Date date)
+	{
+		final int idx = idx(date);
+		if (idx < 0)
+			return ~idx;
+		return idx;
+	}
+	// if it's not in the list, returns null. for something more robust, use getCeiling or getFloor
+	public HistRow get(final Date date)
+	{
+		final int idx = idx(date);
+		if (idx < 0)
+			return null;
+		return get(idx);
+	}
+	public int size()
+	{
+		return data.size();
+	}
+	public HistRow getCeiling(final Date date)
+	{
+		final int idx = ceil_idx(date);
+		if (idx < -1)
+			throw new RuntimeException("You have bug!");
+		if (idx < 0)
+			return null;
+		return get(idx);
+	}
+	public HistRow getFloor(final Date date)
+	{
+		final int idx = floor_idx(date);
+		if (idx < -1)
+			throw new RuntimeException("You have bug!");
+		if (idx < 0)
+			return null;
+		return get(idx);
+	}
+	public HistRow get(final int idx)
+	{
+		return data.get(idx);
+	}
+	@Override public Iterator<HistRow> iterator()
+	{
+		return data.iterator();
+	}
+
 	/**
 	 * Returns newly allocated list with the dates of the rows of the table.
 	 * @sideeffects Allocation of new List
@@ -112,8 +170,8 @@ public class HistTable
 	 */
 	public List<Date> Dates()
 	{
-		List<Date> ret = new ArrayList<Date>(data.size());
-		for (HistRow row : data)
+		final List<Date> ret = new ArrayList<Date>(data.size());
+		for (final HistRow row : data)
 			ret.add(row.date);
 		return ret;
 	}
@@ -121,8 +179,8 @@ public class HistTable
 	// Extracts the closing prices as list of Double objects.
 	public List<Double> Close()
 	{
-		List<Double> ret = new ArrayList<Double>(data.size());
-		for (HistRow row : data)
+		final List<Double> ret = new ArrayList<Double>(data.size());
+		for (final HistRow row : data)
 			ret.add(row.close);
 		return ret;
 	}
@@ -132,79 +190,78 @@ public class HistTable
 	// and slower to manipulate.
 	public double[] CloseArray()
 	{
-		double[] ret = new double[data.size()];
-		// iterating backwards is faster
-		for (int i = ret.length; i--!=0;)
+		final double[] ret = new double[size()];
+		for (int i = 0; i < ret.length; i++)
 			ret[i] = data.get(i).close;
 		return ret;
 	}
 	public List<Double> High()
 	{
-		List<Double> ret = new ArrayList<Double>(data.size());
-		for (HistRow row : data)
+		final List<Double> ret = new ArrayList<Double>(data.size());
+		for (final HistRow row : data)
 			ret.add(row.high);
 		return ret;
 	}
 	public double[] HighArray()
 	{
-		double[] ret = new double[data.size()];
-		for (int i = ret.length; 0!=i--; )
+		final double[] ret = new double[data.size()];
+		for (int i = 0; i < ret.length; i++)
 			ret[i] = data.get(i).high;
 		return ret;
 	}
 	public List<Double> Low()
 	{
-		List<Double> ret = new ArrayList<Double>(data.size());
-		for (HistRow row : data)
+		final List<Double> ret = new ArrayList<Double>(data.size());
+		for (final HistRow row : data)
 			ret.add(row.low);
 		return ret;
 	}
 	public double[] LowArray()
 	{
-		double[] ret = new double[data.size()];
-		for (int i = ret.length; 0!=i--;)
-			ret[i] = data.get(i).low;
+		final double[] ret = new double[data.size()];
+		for (int i = 0; i < ret.length; i++)
+			ret[i] = get(i).low;
 		return ret;
 	}
 	public List<Double> Open()
 	{
-		List<Double> ret = new ArrayList<Double>(data.size());
-		for (HistRow row : data)
+		final List<Double> ret = new ArrayList<Double>(data.size());
+		for (final HistRow row : data)
 			ret.add(row.open);
 		return ret;
 	}
 	public double[] OpenArray()
 	{
-		double[] ret = new double[data.size()];
-		for (int i = ret.length; i--!=0; )
-			ret[i] = data.get(i).open;
+		final double[] ret = new double[data.size()];
+		for (int i = 0; i < ret.length; i++)
+			ret[i] = get(i).open;
 		return ret;
 	}
 	public List<Double> AdjustedClose()
 	{
-		List<Double> ret = new ArrayList<Double>(data.size());
-		for (HistRow row : data)
+		final List<Double> ret = new ArrayList<Double>(data.size());
+		for (final HistRow row : data)
 			ret.add(row.adj_close);
 		return ret;
 	}
 	public double[] AdjustedCloseArray()
 	{
-		double[] ret = new double[data.size()];
-		for (int i = ret.length; 0!=i--; )
+		final double[] ret = new double[data.size()];
+		for (int i = 0; i < ret.length; i++)
 			ret[i] = data.get(i).adj_close;
 		return ret;
 	}
 	public List<Integer> Volume()
 	{
-		List<Integer> ret = new ArrayList<Integer>(data.size());
-		for (HistRow row : data)
+		final List<Integer> ret = new ArrayList<Integer>(data.size());
+		for (final HistRow row : data)
 			ret.add(row.volume);
 		return ret;
 	}
 	public int[] VolumeArray()
 	{
-		int[] ret = new int[data.size()];
-		for (int i = ret.length; 0!=i--; )
+		final int[] ret = new int[data.size()];
+		for (int i = 0; i < ret.length; i++)
 			ret[i] = data.get(i).volume;
 		return ret;
 	}
@@ -212,16 +269,14 @@ public class HistTable
 	// Pre: All the tables have the same starting and ending dates. otherwise
 	// the result will be undefined.
 	// This function calculates the result of reinvesting dividends
-	private HistTable AdjustReinvestedDividends(DivTable dividends)
+	private HistTable AdjustReinvestedDividends(final DivTable dividends)
 	{
 		if (this.dividendAdjusted)
 			throw new IllegalArgumentException("This is already dividend adjusted!");
-		HistTable ret = new HistTable(this.symbol,this.dateAccessed,new ArrayList<HistRow>(this.data.size()));
-		ret.dividendAdjusted = true;
-		ret.splitAdjusted = this.splitAdjusted;
+		final List<HistRow> ret_data = new ArrayList<HistRow>(this.size());
 
-		List<YahooFinance.Single> ratios = new ArrayList<YahooFinance.Single>(dividends.data.size()+1);
-		ratios.add(new YahooFinance.Single(this.data.get(0).date,1));
+		final List<YahooFinance.Single> ratios = new ArrayList<YahooFinance.Single>(dividends.data.size()+1);
+		ratios.add(new YahooFinance.Single(this.get(0).date,1));
 
 		int idx = 0;
 		for (YahooFinance.Single s : dividends.data)
@@ -231,8 +286,8 @@ public class HistTable
 			HistRow row = null;
 			while (true)
 			{
-				row = this.data.get(idx++);
-				if (row.date.compareTo((Date)s) >= 0) break;
+				row = get(idx++);
+				if (row.compareTo((Date)s) >= 0) break;
 			}
 			final double ratio = 1 + (s.data / row.close); // the percentage + 1.
 			ratios.add(new YahooFinance.Single(s,ratio)); // recall the constructor Single(Date, double)
@@ -242,14 +297,14 @@ public class HistTable
 			ratios.get(i).data *= ratios.get(i-1).data;
 
 		int j = 0;
-		for (int i = 0; i < this.data.size(); i++)
+		for (int i = 0; i < this.size(); i++)
 		{
-			HistRow row = this.data.get(i);
+			final HistRow row = get(i);
 			// find the correct ex-date
 			if (j < ratios.size() - 1 && ratios.get(j+1).toInt()==row.date.toInt())
 				++j;
 			final double ratio = ratios.get(j).data;
-			ret.data.add(new HistRow(row.date,
+			ret_data.add(new HistRow(row.date,
 						MathUtils.roundToCent(row.open * ratio),
 						MathUtils.roundToCent(row.high * ratio),
 						MathUtils.roundToCent(row.low * ratio),
@@ -258,18 +313,19 @@ public class HistTable
 						0 // adj_close undefined.
 						));
 		}
+		final HistTable ret = new HistTable(this.symbol,this.dateAccessed,ret_data);
+		ret.dividendAdjusted = true;
+		ret.splitAdjusted = this.splitAdjusted;
 		return ret;
 	}
 
 	// This function calculates the effect of dividends. This is more correct
 	// than the adjusted close price given by Yahoo Finance
-	private HistTable AdjustDividends(DivTable arg)
+	private HistTable AdjustDividends(final DivTable arg)
 	{
 		if (this.dividendAdjusted)
 			throw new IllegalArgumentException("This is already dividend adjusted!");
-		HistTable ret = new HistTable(this.symbol, this.dateAccessed, new ArrayList<HistRow>(this.data.size()));
-		ret.dividendAdjusted = true;
-		ret.splitAdjusted = this.splitAdjusted;
+		final List<HistRow> ret_data = new ArrayList<HistRow>(this.size());
 
 		List<YahooFinance.Single> dividends = new ArrayList<YahooFinance.Single>(arg.data.size()+1);
 		dividends.add(new YahooFinance.Single(this.data.get(0).date, 0)); // add a zero dividend
@@ -285,15 +341,16 @@ public class HistTable
 
 		// TODO refactor this to get rid of repeated complicated code?
 		int j = 0;
-		for (int i = 0; i < this.data.size(); ++i)
+		for (int i = 0; i < this.size(); ++i)
 		{
-			HistRow row = this.data.get(i);
+			final HistRow row = this.get(i);
 			// figure out if need to move to the next ex-date.
 			// TODO double check correctness
-			if (j < dividends.size() - 1 && row.date.toInt()==dividends.get(j+1).toInt())
+			if (j < dividends.size() - 1 && 0==row.compareTo(dividends.get(j+1)))
+				//	row.toInt()==dividends.get(j+1).toInt())
 				++j;
 			final double dividend = dividends.get(j).data;
-			ret.data.add(new HistRow(row.date,
+			ret_data.add(new HistRow(row.date,
 						MathUtils.roundToCent(row.open + dividend),
 						MathUtils.roundToCent(row.high + dividend),
 						MathUtils.roundToCent(row.low + dividend),
@@ -302,6 +359,9 @@ public class HistTable
 						0 // adj_close undefined
 						));
 		}
+		final HistTable ret = new HistTable(this.symbol, this.dateAccessed, ret_data);
+		ret.dividendAdjusted = true;
+		ret.splitAdjusted = this.splitAdjusted;
 		return ret;
 	}
 
@@ -315,11 +375,9 @@ public class HistTable
 	{
 		if (this.splitAdjusted)
 			throw new IllegalArgumentException("This is already dividend adjusted!");
-		HistTable ret = new HistTable(this.symbol, this.dateAccessed, new ArrayList<HistRow>(this.data.size()));
-		ret.splitAdjusted = true;
-		ret.dividendAdjusted = this.dividendAdjusted;
+		final List<HistRow> ret_data = new ArrayList<HistRow>(this.size());
 
-		List<Single> ratios = splits.RunningRatios(this.StartDate());
+		final List<Single> ratios = splits.RunningRatios(this.StartDate());
 
 		// TODO refactor this to get rid of repeated code.
 		int j = 0;
@@ -333,7 +391,7 @@ public class HistTable
 			// adjust splits forwards in time instead of backwards. TODO comment more clearly
 			final double finalRatio = ratios.get(ratios.size()-1).data;
 			final double ratio = ratios.get(j).data;
-			ret.data.add(new HistRow(row.date,
+			ret_data.add(new HistRow(row.date,
 						MathUtils.roundToCent((row.open / ratio) * finalRatio),
 						MathUtils.roundToCent((row.high / ratio) * finalRatio),
 						MathUtils.roundToCent((row.low / ratio) * finalRatio),
@@ -342,6 +400,9 @@ public class HistTable
 						0 // adj_close undefined.
 						));
 		}
+		final HistTable ret = new HistTable(this.symbol, this.dateAccessed, ret_data);
+		ret.splitAdjusted = true;
+		ret.dividendAdjusted = this.dividendAdjusted;
 		return ret;
 	}
 
@@ -426,4 +487,43 @@ public class HistTable
 
 		return this.AdjustReinvestedDividends().AdjustSplits();
 	}
+	public static final HistTable[] merge(final HistTable... raw_tables)
+	{
+		// complicated thing to avoid n^2 or n log n search.
+		final int len = raw_tables.length;
+		final int[] idx = new int[len];
+		Arrays.fill(idx,0);
+		//final HistTable[] ret = new HistTable[len];
+		final List<HistRow>[] ret_lists = new List[len];
+		for (int i = 0; i < len; i++)
+			//ret[i] = new HistTable(raw_tables[i].symbol, raw_tables[i].dateAccessed, new ArrayList<HistRow>(raw_tables[i].data.size()));
+			ret_lists[i] = new ArrayList<HistRow>(raw_tables[i].size());
+		boolean exit = false;
+		while (!exit)
+		{
+			Date min_date = raw_tables[0].get(idx[0]);
+			boolean all_have = true;
+			for (int i = 0; i < len; i++)
+			{
+				// min_date - other.date > 0 ==> min_date > other.date
+				if (min_date.compareTo(raw_tables[i].get(idx[i])) > 0)
+					min_date = raw_tables[i].get(idx[i]);
+				if (0!=min_date.compareTo(raw_tables[i].get(idx[i])))
+					all_have = false;
+			}
+			if (all_have)
+				for (int i = 0; i < len; i++)
+					ret_lists[i].add(raw_tables[i].get(idx[i]));
+			// increment the laggards
+			for (int i = 0; i < len; i++)
+				if (0==min_date.compareTo(raw_tables[i].get(idx[i])))
+					if (++idx[i] == raw_tables[i].size())
+						exit = true;
+		}
+		final HistTable[] ret = new HistTable[len];
+		for (int i = 0; i < ret.length; i++)
+			ret[i] = new HistTable(raw_tables[i].symbol, raw_tables[i].dateAccessed, ret_lists[i]);
+		return ret;
+	}
 }
+

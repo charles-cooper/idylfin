@@ -38,17 +38,24 @@ public class Date implements Comparable<Date> {
 		month = (date / 100) % 100;
 		day = date % 100;
 	}
+	// YYYY-MM-DD
+	public Date(final String date) {
+		String [] arr = date.split("-");
+		year = Integer.parseInt(arr[0]);
+		month = Integer.parseInt(arr[1]);
+		day = Integer.parseInt(arr[2]);
+	}
 	public Date(final int year, final int month, final int day)
 	{
 		this.year = year; this.month = month; this.day = day;
 	}
 	public Date subtractDays(final int n)
 	{
-		return new Date(this.year, this.month, this.day - n);
+		return new Date(this.toJoda().minusDays(n));
 	}
 	public Date subtractMonths(final int n)
 	{
-		return new Date(this.year, this.month - n, this.day);
+		return new Date(this.toJoda().minusMonths(n));
 	}
 	private DateTime toJoda()
 	{
@@ -57,19 +64,12 @@ public class Date implements Comparable<Date> {
 	private Date(final DateTime dt) { this(dt.year().get(), dt.monthOfYear().get(), dt.dayOfMonth().get()); }
 	public Date addMonths(final int n)
 	{
-		final DateTime dt = this.toJoda();
-		return new Date(dt.plusMonths(n));
+		return new Date(this.toJoda().plusMonths(n));
 	}
+	// TODO fill out the rest of these.
 	public Date subtractYears(final int n)
 	{
-		return new Date(this.year - n, this.month, this.day);
-	}
-	// YYYY-MM-DD
-	public Date(final String date) {
-		String [] arr = date.split("-");
-		year = Integer.parseInt(arr[0]);
-		month = Integer.parseInt(arr[1]);
-		day = Integer.parseInt(arr[2]);
+		return new Date(this.toJoda().minusYears(n));
 	}
 	// Copy constructor
 	public Date(final Date other) {
@@ -127,7 +127,7 @@ public class Date implements Comparable<Date> {
 	public final int toInt() {
 		return year * 10000 + month * 100 + day;
 	}
-	@Override public int compareTo(Date other)
+	@Override public final int compareTo(Date other)
 	{
 		return this.toInt() - other.toInt();
 	}
