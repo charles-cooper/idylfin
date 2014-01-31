@@ -128,8 +128,9 @@ class Portfolio
 			ret[i] = items.get(i).weight;
 		return ret;
 	}
+	/*
 	// start of backtesting interface
-	private void doBacktest()
+	private static double doBacktest(final Portfolio p, final PortfolioFunction func, final int incr_sz)
 		throws IOException
 	{
 		final HistTable data[] = HistTable.merge(tables());
@@ -166,6 +167,7 @@ class Portfolio
 		}
 		System.out.println("total return: "+total_return);
 	}
+	*/
 	private Portfolio weightByPrice(final HistTable[] tables, final Date date)
 		throws IOException
 	{
@@ -240,8 +242,8 @@ class Portfolio
 		//for (final HistRow row : foo)
 		//	System.out.println(row);
 		System.out.println(p.totalLogReturn(begin,end));
-		p.doBacktest();
 		/*
+		p.doBacktest();
 		System.out.println("Market Cap: "+p.marketCap());
 		System.out.println("Earnings: "+p.earnings());
 		System.out.println("Revenue: "+p.revenue());

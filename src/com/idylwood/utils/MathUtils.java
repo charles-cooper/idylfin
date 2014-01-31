@@ -276,6 +276,14 @@ public final class MathUtils {
 		return ret;
 	}
 
+	public static final double[] exp(final double[] data)
+	{
+		final double[] ret = new double[data.length];
+		for (int i = 0; i < data.length; i++)
+			ret[i] = Math.exp(data[i]);
+		return ret;
+	}
+
 	// infinite precision but slow and there is no bound on how
 	// much memory it will need
 	final public static double meanArbPrec(final double data[])
