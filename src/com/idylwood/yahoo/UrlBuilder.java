@@ -80,7 +80,10 @@ public abstract class UrlBuilder {
 	public final String download()
 			throws MalformedURLException, IOException
 	{
-		return IOUtils.fromStream(toURL().openStream());
+		try (java.io.InputStream is = toURL().openStream())
+		{
+			return IOUtils.fromStream(is);
+		}
 	}
 
 	public final java.net.URL toURL()
